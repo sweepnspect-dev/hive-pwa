@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ledge-v1';
-const ASSETS = ['./', './index.html'];
+const CACHE_NAME = 'ledge-v2';
+const ASSETS = ['./', './index.html', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
