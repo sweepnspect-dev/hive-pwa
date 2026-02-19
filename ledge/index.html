@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Ledge">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2310B981'/><text x='50' y='72' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800' font-size='60'>T</text></svg>">
 <title>Ledge — Your Everyday Budget Buddy</title>
 <style>
@@ -1052,7 +1052,7 @@ html.desktop .sidebar *{-webkit-app-region:no-drag}
 
 // ===== PRO SYSTEM =====
 let isPro = localStorage.getItem('thrift_pro') === '1';
-if (!isPro) { localStorage.setItem('thrift_pro', '1'); isPro = true; }
+const PLATFORM = 'pwa'; // Build script overrides per target
 
 function validateKey(key) {
   const clean = key.toUpperCase().replace(/^THRIFT-/, '').replace(/-/g, '');
@@ -1099,6 +1099,19 @@ function showUpgrade() {
   document.getElementById('proKeyInput').value = '';
   document.getElementById('proKeyStatus').textContent = '';
   document.getElementById('proKeyInput').classList.remove('error', 'success');
+  // Platform-aware buy buttons
+  const gBtn = document.getElementById('buyGoogle');
+  const dBtn = document.getElementById('buyDirect');
+  if (PLATFORM === 'pwa') {
+    gBtn.style.display = 'none';
+    dBtn.style.display = '';
+  } else if (PLATFORM === 'desktop') {
+    gBtn.style.display = 'none';
+    dBtn.style.display = '';
+  } else {
+    gBtn.style.display = '';
+    dBtn.style.display = '';
+  }
   // Show data reassurance
   const n = transactions.length;
   const note = document.querySelector('.price-note');
@@ -2579,7 +2592,6 @@ document.addEventListener('backbutton', function(e) {
   if (navigator.app) navigator.app.exitApp();
 }, false);
 </script>
-
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
 </body>
 </html>
