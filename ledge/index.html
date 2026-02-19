@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#10B981">
+<meta name="description" content="Ledge — Your everyday budget buddy. Track spending, set savings goals, and stay on top of your finances. 100% private, works offline.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ledge">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2310B981'/><text x='50' y='72' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800' font-size='60'>T</text></svg>">
+<title>Ledge — Your Everyday Budget Buddy</title>
+<style>
+:root{
+  --green:#10B981;--green-light:#D1FAE5;--green-dark:#059669;
+  --slate:#0F172A;--slate-700:#334155;--slate-500:#64748B;--slate-400:#94A3B8;--slate-200:#E2E8F0;--slate-100:#F1F5F9;--slate-50:#F8FAFC;
+  --amber:#F59E0B;--amber-light:#FEF3C7;
+  --red:#EF4444;--red-light:#FEE2E2;
+  --blue:#3B82F6;--blue-light:#DBEAFE;
+  --white:#FFFFFF;
+  --shadow:0 1px 3px rgba(15,23,42,0.08),0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md:0 4px 6px rgba(15,23,42,0.07),0 2px 4px rgba(15,23,42,0.04);
+  --radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px}
+html{font-size:17px;-webkit-text-size-adjust:100%}
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--slate-50);color:var(--slate);display:flex;min-height:100vh}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:220px;background:var(--white);border-right:1px solid var(--slate-200);
+  display:flex;flex-direction:column;padding:20px 0;flex-shrink:0;
+  position:fixed;top:0;bottom:0;left:0;z-index:10;
+}
+.logo{
+  display:flex;align-items:center;gap:10px;padding:0 20px;margin-bottom:28px;
+}
+.logo-icon{
+  width:32px;height:32px;background:var(--green);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:white;font-size:1.1em;
+}
+.logo-text{font-size:1.15em;font-weight:700;color:var(--slate);letter-spacing:-.3px}
+.logo-badge{
+  font-size:.55rem;background:var(--green-light);color:var(--green-dark);
+  padding:1px 6px;border-radius:8px;font-weight:600;margin-left:auto;
+}
+
+.nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:0 8px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  border-radius:8px;cursor:pointer;color:var(--slate-500);
+  font-size:.88rem;font-weight:500;transition:all .15s;border:none;
+  background:none;width:100%;text-align:left;font-family:inherit;
+}
+.nav-item:hover{background:var(--slate-100);color:var(--slate-700)}
+.nav-item.active{background:var(--green-light);color:var(--green-dark)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+
+.nav-divider{height:1px;background:var(--slate-200);margin:12px 12px}
+
+.sidebar-footer{
+  padding:12px 20px;border-top:1px solid var(--slate-200);margin-top:auto;
+}
+.privacy-badge{
+  display:flex;align-items:center;gap:6px;
+  font-size:.7rem;color:var(--green-dark);font-weight:500;
+}
+.privacy-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* ===== MAIN ===== */
+.main{margin-left:220px;flex:1;min-height:100vh;position:relative;overflow-x:hidden}
+
+.topbar{
+  padding:16px 28px;display:flex;align-items:center;gap:16px;
+  background:var(--white);border-bottom:1px solid var(--slate-200);
+  position:sticky;top:0;z-index:5;
+}
+.topbar h2{font-size:1.2em;font-weight:700;color:var(--slate)}
+.topbar-actions{margin-left:auto;display:flex;gap:8px}
+
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:600;
+  cursor:pointer;border:1px solid var(--slate-200);background:var(--white);
+  color:var(--slate-700);transition:all .15s;font-family:inherit;
+}
+.btn:hover{background:var(--slate-50);border-color:var(--slate-400)}
+.btn-primary{background:var(--green);color:white;border-color:var(--green)}
+.btn-primary:hover{background:var(--green-dark)}
+.btn svg{width:16px;height:16px}
+
+.content{padding:24px 28px}
+
+/* ===== DASHBOARD CARDS ===== */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.metric-card{
+  background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:var(--shadow);
+}
+.metric-label{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--slate-500);margin-bottom:6px}
+.metric-value{font-size:1.6em;font-weight:700;color:var(--slate);font-variant-numeric:tabular-nums}
+.metric-change{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:.72rem;font-weight:600;margin-top:4px;padding:2px 6px;
+  border-radius:6px;
+}
+.metric-change.up{background:var(--green-light);color:var(--green-dark)}
+.metric-change.down{background:var(--red-light);color:var(--red)}
+
+/* ===== CHARTS ===== */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{
+  background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow);
+}
+.chart-title{font-size:.88rem;font-weight:700;color:var(--slate);margin-bottom:16px}
+.chart-canvas{width:100%;display:block}
+
+/* ===== TRANSACTIONS TABLE ===== */
+.table-card{
+  background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.table-header{
+  padding:16px 20px;display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--slate-200);
+}
+.table-header h3{font-size:.92rem;font-weight:700}
+.table-count{font-size:.72rem;color:var(--slate-500);background:var(--slate-100);padding:2px 8px;border-radius:6px}
+.table-search{
+  margin-left:auto;padding:6px 12px;border:1px solid var(--slate-200);
+  border-radius:8px;font-size:.8rem;outline:none;width:200px;
+  font-family:inherit;transition:border-color .15s;
+}
+.table-search:focus{border-color:var(--green)}
+.table-filter{
+  padding:5px 10px;border:1px solid var(--slate-200);border-radius:8px;
+  font-size:.78rem;background:var(--white);color:var(--slate-700);
+  cursor:pointer;font-family:inherit;
+}
+
+table{width:100%;border-collapse:collapse}
+thead th{
+  text-align:left;padding:10px 20px;font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--slate-500);border-bottom:1px solid var(--slate-200);
+  font-weight:600;background:var(--slate-50);
+}
+tbody td{padding:10px 20px;font-size:.84rem;border-bottom:1px solid var(--slate-100)}
+tbody tr:hover{background:var(--slate-50)}
+tbody tr:last-child td{border-bottom:none}
+
+.cat-badge{
+  display:inline-block;padding:2px 10px;border-radius:6px;
+  font-size:.7rem;font-weight:600;
+}
+.amount-pos{color:var(--green-dark);font-weight:600}
+.amount-neg{color:var(--slate);font-weight:600}
+
+/* ===== IMPORT MODAL ===== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,0.4);
+  display:none;align-items:center;justify-content:center;z-index:50;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--white);border-radius:16px;padding:28px;
+  width:540px;max-height:80vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.15);
+}
+.modal h3{font-size:1.1em;font-weight:700;margin-bottom:4px}
+.modal .subtitle{font-size:.82rem;color:var(--slate-500);margin-bottom:20px}
+
+.drop-zone{
+  border:2px dashed var(--slate-200);border-radius:12px;
+  padding:40px 20px;text-align:center;cursor:pointer;
+  transition:all .2s;margin-bottom:16px;
+}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--green);background:var(--green-light)}
+.drop-zone p{color:var(--slate-500);font-size:.88rem;margin-top:8px}
+.drop-zone .icon{font-size:2em;margin-bottom:4px}
+
+.preview-table{
+  width:100%;border-collapse:collapse;font-size:.78rem;margin:16px 0;
+}
+.preview-table th{background:var(--slate-100);padding:6px 10px;text-align:left;font-weight:600}
+.preview-table td{padding:5px 10px;border-bottom:1px solid var(--slate-100)}
+
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{
+  text-align:center;padding:60px 20px;
+}
+.empty-state .icon{font-size:3em;margin-bottom:12px;opacity:0.5}
+.empty-state h3{font-size:1.1em;font-weight:700;color:var(--slate);margin-bottom:6px}
+.empty-state p{color:var(--slate-500);font-size:.88rem;max-width:360px;margin:0 auto 20px}
+
+/* ===== BUDGET VIEW ===== */
+.budget-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.budget-item{
+  background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius);
+  padding:16px 18px;box-shadow:var(--shadow);
+}
+.budget-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.budget-item-name{font-size:.84rem;font-weight:600}
+.budget-item-amount{font-size:.78rem;color:var(--slate-500);font-variant-numeric:tabular-nums}
+.budget-bar{height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden}
+.budget-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.budget-pct{font-size:.68rem;color:var(--slate-500);margin-top:4px;text-align:right}
+
+/* ===== RECEIPT ===== */
+.receipt-btn{
+  display:inline-flex;align-items:center;gap:4px;padding:6px 12px;
+  border:1px dashed var(--slate-200);border-radius:8px;cursor:pointer;
+  background:none;font-size:.78rem;color:var(--slate-500);transition:all .15s;
+  font-family:inherit;
+}
+.receipt-btn:hover{border-color:var(--green);color:var(--green-dark)}
+.receipt-btn.locked{opacity:0.6;cursor:pointer}
+.receipt-thumb{
+  width:28px;height:28px;border-radius:4px;object-fit:cover;cursor:pointer;
+  border:1px solid var(--slate-200);vertical-align:middle;
+}
+.receipt-lightbox{
+  position:fixed;inset:0;background:rgba(15,23,42,0.85);
+  display:flex;align-items:center;justify-content:center;z-index:100;
+  backdrop-filter:blur(4px);
+}
+.receipt-lightbox img{
+  max-width:90vw;max-height:85vh;border-radius:12px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+.receipt-lightbox-close{
+  position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.2);
+  border:none;color:white;width:44px;height:44px;border-radius:50%;
+  font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.receipt-lightbox-actions{
+  position:absolute;bottom:20px;display:flex;gap:8px;
+}
+
+/* ===== CATEGORY LEGEND ===== */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--slate-500)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;bottom:20px;right:20px;
+  background:var(--slate);color:white;
+  padding:10px 20px;border-radius:10px;font-size:.82rem;
+  transform:translateY(60px);opacity:0;transition:all .3s;z-index:100;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+
+/* ===== SAVINGS GOALS ===== */
+.goals-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.goal-card{
+  background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.goal-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--green),var(--green-light));
+}
+.goal-emoji{font-size:1.6em;margin-bottom:8px}
+.goal-name{font-size:.92rem;font-weight:700;color:var(--slate);margin-bottom:4px}
+.goal-target{font-size:.75rem;color:var(--slate-500);margin-bottom:12px}
+.goal-progress{height:10px;background:var(--slate-100);border-radius:5px;overflow:hidden;margin-bottom:6px}
+.goal-progress-fill{height:100%;border-radius:5px;transition:width .5s;background:linear-gradient(90deg,var(--green),#34D399)}
+.goal-stats{display:flex;justify-content:space-between;align-items:center}
+.goal-amount{font-size:.82rem;font-weight:700;color:var(--green-dark)}
+.goal-pct{font-size:.72rem;color:var(--slate-400);font-weight:600}
+.goal-days{font-size:.68rem;color:var(--slate-400);margin-top:4px}
+.add-goal{
+  background:var(--slate-50);border:2px dashed var(--slate-200);border-radius:var(--radius);
+  padding:30px 20px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.add-goal:hover{border-color:var(--green);background:var(--green-light)}
+.add-goal .icon{font-size:1.5em;margin-bottom:6px}
+.add-goal p{font-size:.82rem;color:var(--slate-500);font-weight:500}
+
+/* ===== STREAK CARD ===== */
+.streak-card{
+  background:linear-gradient(135deg,#059669,#10B981);
+  border-radius:var(--radius);padding:20px;color:white;
+  display:flex;align-items:center;gap:16px;margin-bottom:24px;
+}
+.streak-fire{font-size:2.2em}
+.streak-info h3{font-size:1rem;font-weight:700;margin-bottom:2px}
+.streak-info p{font-size:.78rem;opacity:.85}
+.streak-days{margin-left:auto;text-align:center}
+.streak-num{font-size:2rem;font-weight:800;line-height:1}
+.streak-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;opacity:.8}
+
+/* ===== SMART TIP ===== */
+.tip-card{
+  background:var(--amber-light);border:1px solid #FDE68A;
+  border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.tip-icon{font-size:1.2em;flex-shrink:0;margin-top:1px}
+.tip-text{font-size:.82rem;color:#92400E;line-height:1.5}
+.tip-text strong{color:#78350F}
+
+/* ===== GOAL MODAL ===== */
+.goal-form label{display:block;font-size:.78rem;font-weight:600;color:var(--slate-700);margin-bottom:4px;margin-top:12px}
+.goal-form input,.goal-form select{
+  width:100%;padding:8px 12px;border:1px solid var(--slate-200);border-radius:8px;
+  font-size:.84rem;font-family:inherit;outline:none;
+}
+.goal-form input:focus,.goal-form select:focus{border-color:var(--green)}
+
+/* ===== MOBILE HEADER ===== */
+.mobile-header{
+  display:none;align-items:center;gap:10px;
+  padding:12px 16px;background:var(--white);
+  border-bottom:1px solid var(--slate-200);
+  position:fixed;top:0;left:0;right:0;z-index:15;
+}
+.mobile-header .mh-icon{
+  width:28px;height:28px;min-width:28px;background:var(--green);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:white;font-size:.9em;flex-shrink:0;
+}
+.mobile-header .mh-name{font-size:1.05em;font-weight:700;color:var(--slate);flex-shrink:0}
+.mobile-header .mh-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+/* ===== OVERFLOW MENU (mobile) ===== */
+.overflow-menu-wrap{position:relative;display:inline-flex}
+.overflow-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:6px 12px;border:1px solid var(--slate-200);border-radius:8px;
+  background:var(--white);cursor:pointer;font-size:1.3rem;color:var(--slate-500);
+  font-family:inherit;transition:all .15s;line-height:1;
+}
+.overflow-btn:hover{background:var(--slate-50);border-color:var(--slate-400)}
+html.dark .overflow-btn{background:#1A2B1A;border-color:#2A3A2A;color:#8DB88D}
+html.dark .overflow-btn:hover{background:#2A3A2A}
+.overflow-dropdown{
+  display:none;position:absolute;top:100%;right:0;margin-top:4px;
+  background:var(--white);border:1px solid var(--slate-200);border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:160px;z-index:30;
+  overflow:hidden;
+}
+.overflow-dropdown.open{display:block}
+html.dark .overflow-dropdown{background:#1A2B1A;border-color:#2A3A2A;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.overflow-dropdown button{
+  display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;
+  border:none;background:none;cursor:pointer;font-size:.82rem;font-weight:500;
+  color:var(--slate-700);font-family:inherit;text-align:left;transition:background .1s;
+}
+.overflow-dropdown button:hover{background:var(--slate-50)}
+html.dark .overflow-dropdown button{color:#B8D4B8}
+html.dark .overflow-dropdown button:hover{background:#2A3A2A}
+.overflow-dropdown button.danger-item{color:var(--red)}
+html.dark .overflow-dropdown button.danger-item{color:#F87171}
+.overflow-divider{height:1px;background:var(--slate-200);margin:2px 0}
+html.dark .overflow-divider{background:#2A3A2A}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:1px solid var(--slate-200);
+  padding:6px 0 max(6px, env(safe-area-inset-bottom));
+  z-index:20;
+}
+.bottom-nav-items{display:flex;justify-content:space-around;align-items:center}
+.bottom-nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 10px;border:none;background:none;
+  color:var(--slate-400);font-size:.65rem;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:color .15s;
+  -webkit-tap-highlight-color:transparent;min-width:56px;
+}
+.bottom-nav-item svg{width:26px;height:26px}
+.bottom-nav-item.active{color:var(--green-dark)}
+
+/* ===== SYNC VIEW ===== */
+.sync-hero{text-align:center;padding:20px;margin-bottom:20px}
+.sync-hero .icon{font-size:2.5em;margin-bottom:8px}
+.sync-hero h3{font-size:1.1em;font-weight:700;margin-bottom:4px}
+.sync-hero p{font-size:.82rem;color:var(--slate-500);max-width:420px;margin:0 auto;line-height:1.5}
+.sync-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sync-card{
+  background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius);
+  padding:24px;box-shadow:var(--shadow);
+}
+.sync-card h4{font-size:.95rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.sync-card p{font-size:.8rem;color:var(--slate-500);margin-bottom:16px;line-height:1.5}
+.sync-input{
+  width:100%;padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;
+  font-size:16px;font-family:inherit;outline:none;margin-bottom:12px;
+}
+.sync-input:focus{border-color:var(--green)}
+.sync-drop{
+  border:2px dashed var(--slate-200);border-radius:12px;
+  padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;
+}
+.sync-drop:hover,.sync-drop.drag{border-color:var(--green);background:var(--green-light)}
+.sync-drop .icon{font-size:1.3em;margin-bottom:4px}
+.sync-drop p{color:var(--slate-500);font-size:.8rem}
+.sync-status{padding:10px 14px;border-radius:8px;font-size:.82rem;margin-top:8px;display:none}
+.sync-status.show{display:block}
+.sync-status.success{background:var(--green-light);color:var(--green-dark)}
+.sync-status.error{background:var(--red-light);color:var(--red)}
+.sync-info{
+  font-size:.7rem;color:var(--slate-400);display:flex;align-items:center;gap:6px;
+  margin-top:16px;padding-top:12px;border-top:1px solid var(--slate-100);
+}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ===== FAB ===== */
+.fab{
+  position:fixed;bottom:28px;right:28px;z-index:30;
+  width:56px;height:56px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
+  color:white;font-size:1.6rem;cursor:pointer;
+  box-shadow:0 4px 14px rgba(34,197,94,0.4);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,box-shadow .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(34,197,94,0.5)}
+.fab:active{transform:scale(0.95)}
+html.dark .fab{box-shadow:0 4px 14px rgba(34,197,94,0.3)}
+
+/* ===== RESPONSIVE: TABLET ===== */
+@media(max-width:1024px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+  .budget-grid{grid-template-columns:repeat(2,1fr)}
+  .goals-grid{grid-template-columns:repeat(2,1fr)}
+  .sync-grid{grid-template-columns:1fr}
+}
+
+/* ===== RESPONSIVE: PHONE ===== */
+@media(max-width:768px){
+  html{font-size:21px}
+  .sidebar{display:none}
+  .main{margin-left:0;padding-bottom:68px;padding-top:53px}
+  .mobile-header{display:flex}
+  .bottom-nav{display:block}
+  .topbar{display:none}
+  .content{padding:16px}
+  .modal{width:calc(100vw - 32px);max-width:540px}
+  .table-header{flex-wrap:wrap;gap:8px}
+  .table-search{width:100%;margin-left:0;order:10}
+  .table-card{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:auto}
+  .receipt-btn{padding:8px;font-size:0;min-height:38px;min-width:38px;justify-content:center}
+  .fab{bottom:96px;right:20px}
+  .streak-card{flex-wrap:wrap}
+  .streak-days{margin-left:0;flex:0 0 auto}
+  .goal-form input,.goal-form select{font-size:16px}
+  .sync-grid{grid-template-columns:1fr}
+}
+
+/* ===== RESPONSIVE: SMALL PHONE ===== */
+@media(max-width:480px){
+  html{font-size:19px}
+  .metrics{grid-template-columns:1fr}
+  .budget-grid{grid-template-columns:1fr}
+  .goals-grid{grid-template-columns:1fr}
+  .content{padding:12px}
+  .metric-value{font-size:1.3em}
+  .metric-card{padding:14px 16px}
+  .drop-zone{padding:24px 16px}
+  .modal{padding:20px;border-radius:12px}
+  .chart-card{padding:14px}
+  .sync-card{padding:16px}
+  .legend{gap:4px 8px}
+  .legend-item{font-size:.62rem}
+  table{min-width:auto}
+  thead th{padding:8px 10px;font-size:.62rem;letter-spacing:.3px}
+  tbody td{padding:8px 10px;font-size:.76rem}
+  .cat-badge{padding:1px 6px;font-size:.6rem}
+  .streak-card{padding:14px;gap:10px}
+  .streak-fire{font-size:1.6em}
+  .streak-num{font-size:1.5rem}
+}
+
+/* ===== DARK MODE ===== */
+html.dark{
+  --slate:#E8F0E8;--slate-700:#D0DED0;--slate-500:#8FA88F;--slate-400:#8FA88F;
+  --slate-200:#2A3A2A;--slate-100:#1A2B1A;--slate-50:#111E11;
+  --white:#1A2B1A;
+  --shadow:0 1px 3px rgba(0,0,0,0.3);--shadow-md:0 4px 6px rgba(0,0,0,0.3);
+  --green-light:#1A3B2A;--green-dark:#6EE7B7;
+  --amber-light:#3B3A1A;--red-light:#3B1A1A;--blue-light:#1A2B3B;
+}
+html.dark body{background:#111E11;color:#E8F0E8}
+html.dark .sidebar{background:#0C170C;border-color:#1A2B1A}
+html.dark .topbar{background:#1A2B1A;border-color:#2A3A2A}
+html.dark .mobile-header{background:#1A2B1A;border-color:#2A3A2A}
+html.dark .bottom-nav{background:#1A2B1A;border-color:#2A3A2A}
+html.dark .modal{background:#1A2B1A}
+html.dark .modal-overlay{background:rgba(0,0,0,0.6)}
+html.dark .drop-zone{border-color:#2A3A2A}
+html.dark .drop-zone:hover{border-color:var(--green);background:#1A3B2A}
+html.dark .table-search,html.dark .table-filter,html.dark .sync-input{background:#111E11;border-color:#2A3A2A;color:#E8F0E8}
+html.dark thead th{background:#111E11;border-color:#2A3A2A;color:#8FA88F}
+html.dark tbody td{border-color:#1A2B1A}
+html.dark .preview-table th{background:#111E11}
+html.dark .preview-table td{border-color:#1A2B1A}
+html.dark .nav-item.active{background:#1A3B2A;color:#6EE7B7}
+html.dark .btn{background:#111E11;border-color:#2A3A2A;color:#D0DED0}
+html.dark .btn:hover{background:#2A3A2A}
+html.dark .btn-primary{background:var(--green);color:#111E11;border-color:var(--green)}
+html.dark .sync-tech{background:#111E11;border-color:#2A3A2A;color:#8FA88F}
+html.dark canvas{filter:none}
+html.dark .sync-hero p{color:#8FA88F}
+html.dark .sync-card p{color:#8FA88F}
+html.dark .price-note{color:#8FA88F !important}
+html.dark .empty-state p{color:#8FA88F}
+html.dark details details>summary{filter:brightness(1.8) saturate(0.7)}
+html.dark .budget-item-edit:hover{color:#6EE7B7}
+html.dark .receipt-btn{border-color:#3A4A3A;color:#8FA88F}
+html.dark .receipt-btn:hover{border-color:#6EE7B7;color:#6EE7B7}
+html.dark .receipt-thumb{border-color:#3A4A3A}
+html.dark select,html.dark input[type="text"],html.dark input[type="number"],html.dark input[type="date"],html.dark input[type="password"],html.dark textarea{background:#111E11;border-color:#2A3A2A;color:#E8F0E8}
+html.dark .table-row:hover{background:#111E11}
+html.dark .promo-banner{background:linear-gradient(135deg,#1A3B2A,#1A2B3B);border-color:#2A4A2A}
+html.dark .promo-banner .promo-title{color:#E8F0E8}
+html.dark .promo-banner .promo-desc{color:#8FA88F}
+html.dark .promo-banner .promo-cta{background:#34D399;color:#064E3B}
+html.dark .tx-modal{background:#1A2B1A}
+html.dark .tx-modal-overlay{background:rgba(0,0,0,0.6)}
+html.dark .tx-type-toggle{border-color:#2A3A2A}
+html.dark .tx-type-toggle button{background:#111E11;color:#8FA88F}
+html.dark .tx-type-toggle button.active-expense{background:#3B1A1A;color:#F87171}
+html.dark .tx-type-toggle button.active-income{background:#1A3B2A;color:#6EE7B7}
+html.dark .cat-grid-item{border-color:#2A3A2A;color:#D0DED0}
+html.dark .cat-grid-item:hover{border-color:var(--green)}
+html.dark .cat-grid-item.selected{border-color:var(--green);background:#1A3B2A;color:#6EE7B7}
+html.dark .key-input{background:#111E11;border-color:#2A3A2A;color:#E8F0E8}
+html.dark .upgrade-panel{background:#1A2B1A}
+html.dark .overflow-menu{background:#1A2B1A;border-color:#2A3A2A}
+html.dark .overflow-menu-item{color:#D0DED0}
+html.dark .overflow-menu-item:hover{background:#111E11}
+
+html.dark .locked-overlay::after{background:linear-gradient(180deg,transparent 30%,rgba(17,30,17,0.85) 70%,rgba(17,30,17,0.98) 100%)}
+html.dark .empty-cta-btn,.dark .empty-action-btn{background:#1A2B1A;border-color:#2A3A2A}
+html.dark .empty-cta-btn:hover,.dark .empty-action-btn:hover{background:#1A3B2A;border-color:#6EE7B7}
+
+/* ===== PROMO BANNER (free users) ===== */
+.promo-banner{
+  background:linear-gradient(135deg,var(--green-light),var(--blue-light));
+  border:1px solid var(--slate-200);border-radius:var(--radius);
+  padding:14px 20px;margin-bottom:24px;
+  display:flex;align-items:center;gap:14px;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+}
+.promo-banner:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.promo-banner .promo-icon{font-size:1.4rem;flex-shrink:0}
+.promo-banner .promo-text{flex:1}
+.promo-banner .promo-title{font-weight:700;font-size:.85rem;color:var(--slate);margin-bottom:2px}
+.promo-banner .promo-desc{font-size:.75rem;color:var(--slate-500)}
+.promo-banner .promo-cta{
+  font-size:.72rem;font-weight:700;color:white;background:var(--green);
+  padding:6px 14px;border-radius:8px;white-space:nowrap;
+}
+
+/* ===== PRO SYSTEM ===== */
+.pro-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:.6rem;
+  font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,#059669,#10B981);color:white;
+  text-transform:uppercase;vertical-align:middle;margin-left:6px;
+}
+.upgrade-cta{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;margin:8px 0;
+  background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(5,150,105,0.06));
+  border:1px solid rgba(16,185,129,0.2);border-radius:10px;cursor:pointer;
+  transition:all 0.2s;
+}
+.upgrade-cta:hover{background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(5,150,105,0.12));transform:translateY(-1px)}
+.upgrade-cta .icon{font-size:1.3em}
+.upgrade-cta .text{flex:1}
+.upgrade-cta .title{font-size:.82rem;font-weight:700;color:var(--slate)}
+.upgrade-cta .desc{font-size:.68rem;color:var(--slate-400);margin-top:2px}
+.upgrade-cta .arrow{color:var(--green-dark);font-weight:700;font-size:1.1em}
+
+.locked-overlay{position:relative;overflow:hidden}
+.locked-overlay::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 30%,rgba(248,250,252,0.85) 70%,rgba(248,250,252,0.98) 100%);
+  pointer-events:none;z-index:1;border-radius:inherit;
+}
+.locked-badge{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:2;
+  display:flex;align-items:center;gap:6px;padding:8px 16px;
+  background:linear-gradient(135deg,#059669,#10B981);color:white;
+  border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 12px rgba(16,185,129,0.3);transition:transform 0.2s;
+}
+.locked-badge:hover{transform:translateX(-50%) scale(1.05)}
+.locked-badge svg{width:14px;height:14px}
+
+.upgrade-modal{
+  position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;z-index:200;
+  opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.upgrade-modal.open{opacity:1;pointer-events:auto}
+.upgrade-panel{
+  background:var(--white);border-radius:20px;padding:36px;max-width:440px;width:calc(100vw - 32px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);transform:translateY(20px);transition:transform 0.3s;
+}
+.upgrade-modal.open .upgrade-panel{transform:translateY(0)}
+.upgrade-panel h2{font-size:1.3rem;margin-bottom:4px}
+.upgrade-panel .price{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#059669,#10B981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:16px 0 4px}
+.upgrade-panel .price-note{font-size:.72rem;color:var(--slate-400);margin-bottom:20px}
+.upgrade-features{list-style:none;margin-bottom:24px}
+.upgrade-features li{padding:6px 0;font-size:.85rem;display:flex;align-items:center;gap:8px;color:var(--slate-500)}
+.upgrade-features li::before{content:'✓';color:#059669;font-weight:700;width:18px;text-align:center}
+.key-input{
+  width:100%;padding:12px 14px;border:2px solid var(--slate-200);border-radius:10px;
+  font-family:'Cascadia Code','Fira Code',monospace;font-size:.95rem;text-align:center;
+  letter-spacing:2px;text-transform:uppercase;background:var(--slate-50);transition:border-color 0.2s;
+}
+.key-input:focus{border-color:#10B981;outline:none}
+.key-input.error{border-color:var(--red);animation:shake 0.4s}
+.key-input.success{border-color:#10B981}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.key-status{font-size:.72rem;margin-top:6px;text-align:center;min-height:1.2em}
+.key-status.error{color:var(--red)}
+.key-status.success{color:#10B981}
+.upgrade-actions{display:flex;gap:8px;margin-top:16px}
+.upgrade-actions .btn{flex:1}
+.btn-pro{background:linear-gradient(135deg,#059669,#10B981);color:white;border:none;font-weight:700}
+.btn-pro:hover{opacity:0.9}
+.buy-links{display:flex;gap:8px;margin-top:12px}
+.buy-link{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px;border-radius:10px;font-size:.78rem;font-weight:600;
+  text-decoration:none;color:var(--slate);border:1px solid var(--slate-200);transition:all 0.2s;
+}
+.buy-link:hover{border-color:#10B981;background:rgba(16,185,129,0.05)}
+/* Desktop title bar offset */
+html.desktop .topbar{-webkit-app-region:drag;padding-right:150px}
+html.desktop .topbar *{-webkit-app-region:no-drag}
+html.desktop .mobile-header{padding-right:150px}
+html.desktop .sidebar{-webkit-app-region:drag}
+html.desktop .sidebar *{-webkit-app-region:no-drag}
+</style>
+<script>if(window.desktop)document.documentElement.classList.add('desktop');</script>
+</head>
+<body>
+
+<!-- MOBILE HEADER (phone only) -->
+<header class="mobile-header">
+  <div class="mh-icon">L</div>
+  <span class="mh-name">Ledge</span>
+  <div class="mh-actions">
+    <button class="btn btn-primary" id="btnImportMobile" style="padding:6px 12px;font-size:.75rem">Import</button>
+    <button class="btn" id="btnDarkMob" style="padding:6px 10px;font-size:.72rem" title="Dark mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+    </button>
+    <div class="overflow-menu-wrap">
+      <button class="overflow-btn" id="mobileOverflowBtn" aria-label="More options" title="More options">&#9776;</button>
+      <div class="overflow-dropdown" id="mobileOverflowMenu">
+        <button id="btnDemoMobile">&#9654; Load Demo Data</button>
+        <button id="btnExportMobile">&#128229; Export Data</button>
+        <div class="overflow-divider"></div>
+        <button id="btnClearMobile" class="danger-item">&#128465; Clear All Data</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" aria-label="Main navigation">
+  <div class="logo">
+    <div class="logo-icon">L</div>
+    <span class="logo-text">Ledge</span>
+    <span class="logo-badge" id="logoBadge">LOCAL</span>
+  </div>
+  <div id="proSidebarBadge"></div>
+  <div class="nav">
+    <button class="nav-item active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-view="transactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Transactions
+    </button>
+    <button class="nav-item" data-view="budgets">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Budgets
+    </button>
+    <button class="nav-item" data-view="goals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Savings Goals
+    </button>
+    <div class="nav-divider"></div>
+    <button class="nav-item" id="navImport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import CSV
+    </button>
+    <button class="nav-item" id="navExport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export Data
+    </button>
+    <div class="nav-divider"></div>
+    <button class="nav-item" data-view="sync">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/></svg>
+      Device Sync
+    </button>
+  </div>
+  <div class="sidebar-footer">
+    <button class="nav-item" id="btnDarkToggle" style="margin-top:auto;border:none;background:none;cursor:pointer;font-family:inherit;text-align:left;width:100%"><span class="nav-icon">🌙</span> Dark Mode</button>
+    <div class="privacy-badge">
+      <span class="privacy-dot"></span>
+      100% local — your data never leaves this device
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h2 id="viewTitle">Dashboard</h2>
+    <div class="topbar-actions">
+      <button class="btn" id="btnDemo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Load Demo Data
+      </button>
+      <button class="btn btn-primary" id="btnImport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import CSV
+      </button>
+    </div>
+  </div>
+
+  <main class="content" id="content" role="main" aria-live="polite">
+    <!-- Views rendered by JS -->
+  </main>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="importModal" role="dialog" aria-label="Import bank statement">
+  <div class="modal">
+    <h3>Import Bank Statement</h3>
+    <p class="subtitle">Drop in a CSV from any major bank. We'll auto-detect the format and categorize everything for you.</p>
+    <details style="margin-bottom:14px">
+      <summary style="font-size:.92rem;color:var(--green-dark);cursor:pointer;font-weight:600;padding:4px 0">Bank CSV Download Guide (21 banks)</summary>
+      <div style="max-height:340px;overflow-y:auto;padding:10px 0;font-size:.82rem;color:var(--slate-700);line-height:1.6">
+        <div style="background:var(--green-light);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:.75rem">
+          <strong>Important:</strong> No bank offers CSV download from their mobile app. You must use the bank's <strong>website</strong> (desktop browser or "Request Desktop Site" on your phone).
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#005EB8;font-size:.88rem">Chase <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· chase.com · Up to 24 months</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Sign in at chase.com</li><li>Select your account (checking/savings/credit card)</li><li>Click the <strong>"Download account activity"</strong> icon (↓ arrow near transactions) — or <strong>More → Download account activity</strong></li><li>File type → <strong>"Spreadsheet (Excel, CSV)"</strong></li><li>Set date range → Click <strong>Download</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Heads up:</strong> ~1,500 transaction cap per download. Mobile app = PDF only.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#2A5DB0;font-size:.88rem">Bank of America <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· bankofamerica.com · 18mo / 12mo CC</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at bankofamerica.com</li><li>Click your account → <strong>Activity</strong> tab</li><li>Click <strong>"Download"</strong> link (right side, above transactions)</li><li>Set date range → Select <strong>"Microsoft Excel Format"</strong> (this IS a CSV despite the name)</li><li>Click <strong>"Download Transactions"</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Heads up:</strong> 3,000 transaction cap. QFX discontinued. Credit cards limited to 12 months.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#D71E28;font-size:.88rem">Wells Fargo <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· wellsfargo.com · 18mo / 90d CC</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Sign in at wellsfargo.com</li><li>Select account → <strong>Account Activity</strong></li><li>Click <strong>"Download Account Activity"</strong></li><li>Set date range → File Type: <strong>"Comma Delimited (ASCII, Spreadsheet)"</strong></li><li>Click <strong>Download</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Heads up:</strong> Credit cards limited to just 90 days. Format labeled "Comma Delimited" not "CSV."</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#1A73B5;font-size:.88rem">Citibank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· citi.com · Up to 180 days</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Sign in at citi.com → select account</li><li>Go to <strong>"Your Activity"</strong></li><li>Set date range → Click <strong>Search</strong></li><li>Click the <strong>Download icon</strong> (top-right of transactions)</li><li>Under "Text Formats" select <strong>"CSV"</strong> → <strong>Export</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Bug:</strong> Format picker breaks with ad blockers. Use <strong>Incognito mode</strong> if dropdown doesn't work.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#0A6EAD;font-size:.88rem">Capital One <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· capitalone.com · ~2yr / 25mo CC</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at capitalone.com</li><li>Click your account</li><li>Find <strong>"Download Transactions"</strong> — may be under gear icon <strong>"I want to..."</strong></li><li>File Type → <strong>CSV</strong> → set time period</li><li>Click <strong>Export</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Note:</strong> Checking/savings ~90 days per download. Credit cards up to 25 months.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#D8273F;font-size:.88rem">US Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· usbank.com · 18mo (90-day chunks)</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at usbank.com</li><li><strong>My Accounts</strong> → select account</li><li>Find the <strong>download icon</strong> (↓) in the Transactions tile top-right</li><li>Set date range → choose <strong>CSV</strong></li><li>Click <strong>Download</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Painful:</strong> Only 90 days per download. For 18 months, you need 6 separate downloads.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#F58220;font-size:.88rem">PNC Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· pnc.com</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at pnc.com</li><li><strong>My Accounts</strong> → select account → <strong>Account Activity</strong></li><li>Change date to <strong>"Custom Date Range"</strong></li><li>Click <strong>Export</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Warning:</strong> CSV limited to 90 days. For older data: Online Statements → Activity Detail → Export (one month at a time). Virtual Wallet may be PDF-only.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#54B948;font-size:.88rem">TD Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· tdbank.com · 45-day batches</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at tdbank.com</li><li><strong>My Accounts</strong> → click account → <strong>Activity</strong> tab</li><li>Scroll to the <strong>bottom</strong> of the page</li><li>Select <strong>"Spreadsheet (.CSV)"</strong> from dropdown next to Download</li><li>Click <strong>Download</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Heads up:</strong> 45-day cap per download. Download button is at the BOTTOM of the page.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#6B2D8B;font-size:.88rem">Truist <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· truist.com · Up to 18 months</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Sign in at truist.com</li><li>Click your account</li><li>Click the <strong>Download</strong> button near transactions</li><li>Set date range (30d, 60d, or custom)</li><li>File type <strong>defaults to CSV</strong> — click Download</li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Note:</strong> CSV column layout changed late 2025. Columns: Posted Date, Transaction Date, Description, Merchant, Category, Amount.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#7B2D72;font-size:.88rem">Ally Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· ally.com · Up to 18 months</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at ally.com</li><li>Select your account</li><li>Scroll to <strong>"Transaction History"</strong></li><li>Click the <strong>download icon</strong> (↓ arrow — easy to miss)</li><li>Set date range → choose <strong>CSV</strong> → Download</li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Note:</strong> Download icon is small and embedded in the Transaction History section. Only works for checking/savings — not investment accounts.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#FF6600;font-size:.88rem">Discover <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· discover.com · Up to 24 months</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at discover.com</li><li>Click <strong>"Activity"</strong> → <strong>"Search Transactions"</strong></li><li>Enter date range → <strong>Search</strong></li><li>Click <strong>Download</strong> (top-right of results)</li><li>Select <strong>CSV</strong> → Download</li></ol>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#3A6DB8;font-size:.88rem">USAA <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· usaa.com · 45d checking / 90d CC</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at usaa.com</li><li><strong>My Accounts</strong> → select account</li><li>Click <strong>"I Want To..."</strong> → <strong>"Export"</strong></li><li>Set date range → <strong>"Comma-Delimited (CSV)"</strong></li><li>Click <strong>Export</strong></li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--red-light);border-radius:6px;font-size:.78rem"><strong>Critical bug:</strong> Credit card CSV has debit/credit signs FLIPPED. You may need to reverse the amounts after import. Only 45 days for checking.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#2B6FAE;font-size:.88rem">Navy Federal <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· navyfederal.org</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at navyfederal.org</li><li>Select account → transaction history</li><li>Click <strong>Download/Export</strong></li><li>Select <strong>CSV</strong> → set date range → Download</li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Note:</strong> CSV dates may be missing the year column. One account at a time only.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#00A0DF;font-size:.88rem">Charles Schwab <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· schwab.com · Up to 10 years</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at schwab.com</li><li><strong>Accounts</strong> → <strong>History</strong></li><li>Select account and date range → <strong>Search</strong></li><li>Click <strong>Export</strong> (upper right) → <strong>CSV</strong> → Export</li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--red-light);border-radius:6px;font-size:.78rem"><strong>Silent failure:</strong> Over 10,000 transactions = empty file with NO error. Use quarterly date ranges for large accounts.</div>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#84BD00;font-size:.88rem">Regions Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· regions.com · Up to 18 months</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at regions.com → select account</li><li>Click the <strong>"Download Transactions"</strong> icon (small, above pending activity)</li><li>Select <strong>CSV</strong> → set date range → Download</li></ol>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#00A86B;font-size:.88rem">Citizens Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· citizensbank.com · Up to 18 months</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at citizensbank.com → click account</li><li>Click <strong>"Export"</strong> icon or <strong>"Download Account Data"</strong></li><li>Format → <strong>CSV</strong> → set date range → Download</li></ol>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#5BA63C;font-size:.88rem">Huntington <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· huntington.com · ~2 years</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at huntington.com</li><li><strong>My Accounts</strong> → click account</li><li>Click <strong>"Download Account Transactions"</strong></li><li>Set date range → <strong>CSV</strong> → Download</li></ol>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#3568C8;font-size:.88rem">Fifth Third <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· 53.com</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in → <strong>Services</strong> tab → <strong>"Export Transactions"</strong></li><li>Choose <strong>CSV</strong> format</li><li>Set date range → Download</li><li>Import the CSV file here</li></ol>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#00A67E;font-size:.88rem">M&T Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· mtb.com · PDF only</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <p style="color:#00A67E;font-weight:600;margin-bottom:4px">M&T has no file export at all — only PDF statements.</p>
+              <p>Copy your transactions from the M&T website and manually enter them, or try exporting from their desktop site which may offer CSV downloads.</p>
+            </div>
+          </details>
+          <details style="background:var(--slate-50);border-radius:8px;padding:0">
+            <summary style="padding:10px 12px;cursor:pointer;font-weight:700;color:#B31F29;font-size:.88rem">First Hawaiian Bank <span style="font-size:.75rem;color:var(--slate-400);font-weight:400">· fhb.com · Up to 36 months</span></summary>
+            <div style="padding:4px 12px 12px;font-size:.75rem">
+              <ol style="margin:0;padding-left:18px"><li>Log in at <strong>fhb.com</strong> → select your account</li><li>Go to the <strong>Transactions</strong> tab</li><li>Click the <strong>"Export"</strong> icon (↓) — or use <strong>Download</strong> link under Accounts tab</li><li>Choose <strong>CSV</strong> format</li><li>Set date range → Download</li><li>Import the CSV file here</li></ol>
+              <div style="margin-top:6px;padding:6px 8px;background:var(--amber-light);border-radius:6px;font-size:.78rem"><strong>Heads up:</strong> Mobile app may not offer export. Use the website for downloads.</div>
+            </div>
+          </details>
+        </div>
+        <div style="margin-top:12px;padding:8px 12px;background:var(--slate-50);border-radius:8px;font-size:.78rem;color:var(--slate-400)">
+          <strong>Don't see your bank?</strong> Most banks: Log in on their website → find your account → look for "Download", "Export", or a ↓ icon → choose CSV → pick a date range. If CSV isn't available, try looking for a Download or Export option.
+        </div>
+      </div>
+    </details>
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">📂</div>
+      <p>Drag & drop your CSV here, or <strong>click to browse</strong></p>
+      <p style="font-size:.78rem;color:var(--slate-400);margin-top:4px">Supports Chase, BofA, Wells Fargo, Capital One, Citi, Discover, and more</p>
+      <input type="file" id="fileInput" accept=".csv,text/csv,text/comma-separated-values,application/csv,text/plain,*/*" style="display:none">
+    </div>
+    <div id="importPreview"></div>
+    <div class="modal-actions">
+      <button class="btn" id="importCancel">Cancel</button>
+      <button class="btn btn-primary" id="importConfirm" style="display:none">Import Transactions</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="modal-overlay" id="goalModal">
+  <div class="modal">
+    <h3>New Savings Goal</h3>
+    <p class="subtitle">Set a target and watch your progress grow!</p>
+    <div class="goal-form">
+      <label>What are you saving for?</label>
+      <input type="text" id="goalName" placeholder="e.g. Emergency Fund, Vacation, New Laptop">
+      <label>Pick an emoji</label>
+      <select id="goalEmoji">
+        <option value="🎯">🎯 Target</option><option value="🏖️">🏖️ Vacation</option>
+        <option value="🚗">🚗 Car</option><option value="💻">💻 Tech</option>
+        <option value="🏠">🏠 Home</option><option value="🎓">🎓 Education</option>
+        <option value="💍">💍 Wedding</option><option value="🛡️">🛡️ Emergency</option>
+        <option value="🎁">🎁 Gift</option><option value="✈️">✈️ Travel</option>
+      </select>
+      <label>Target amount ($)</label>
+      <input type="number" id="goalTarget" placeholder="1000" min="1">
+      <label>Saved so far ($)</label>
+      <input type="number" id="goalSaved" placeholder="0" min="0" value="0">
+      <label>Target date (optional)</label>
+      <input type="date" id="goalDate">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="goalCancel">Cancel</button>
+      <button class="btn btn-primary" id="goalSave">Save Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (phone only) -->
+<nav class="bottom-nav" aria-label="Quick navigation">
+  <div class="bottom-nav-items">
+    <button class="bottom-nav-item active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Home
+    </button>
+    <button class="bottom-nav-item" data-view="transactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Activity
+    </button>
+    <button class="bottom-nav-item" data-view="budgets">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Budgets
+    </button>
+    <button class="bottom-nav-item" data-view="goals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Goals
+    </button>
+    <button class="bottom-nav-item" data-view="sync">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/></svg>
+      Sync
+    </button>
+  </div>
+</nav>
+
+<!-- PRO UPGRADE MODAL -->
+<div class="upgrade-modal" id="upgradeModal">
+  <div class="upgrade-panel">
+    <div style="text-align:center">
+      <div style="font-size:2em;margin-bottom:4px">&#127793;</div>
+      <h2>Ledge Pro</h2>
+      <div class="price">$4.99</div>
+      <div class="price-note">One-time purchase. No subscription. No cloud.</div>
+    </div>
+    <ul class="upgrade-features">
+      <li>6-month trend analytics</li>
+      <li>CSV import with bank detection</li>
+      <li>Unlimited savings goals</li>
+      <li>No-spend streak tracker</li>
+      <li>Device-to-device sync</li>
+      <li>All future updates included</li>
+    </ul>
+    <input type="text" class="key-input" id="proKeyInput" placeholder="THRIFT-XXXX-XXXX-XXXX" maxlength="21" autocomplete="off" spellcheck="false">
+    <div class="key-status" id="proKeyStatus"></div>
+    <div class="upgrade-actions">
+      <button class="btn" id="upgradeCancel">Later</button>
+      <button class="btn btn-pro" id="upgradeActivate">Activate Key</button>
+    </div>
+    <div class="buy-links">
+      <a class="buy-link" href="#" id="buyGoogle">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 20.5v-17c0-.83.52-1.28 1.02-1.42L12 8l-8 4.5v8l-1-.5zm1-4l7-4-7-4v8zm9 0l8-4.5L13 8V3.5l8 8.5-8 8.5V16.5z"/></svg>
+        Google Play
+      </a>
+      <a class="buy-link" href="#" id="buyDirect">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Buy Direct
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT TRANSACTION MODAL -->
+<div class="modal-overlay" id="txModal">
+  <div class="modal" style="max-width:420px">
+    <h3 id="txModalTitle">Add Transaction</h3>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:.82rem;font-weight:600;color:var(--slate-500);margin-bottom:4px">Amount</label>
+      <input type="number" id="txEditAmount" style="width:100%;padding:10px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:1rem;font-family:inherit" min="0" step="0.01" inputmode="decimal">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:.82rem;font-weight:600;color:var(--slate-500);margin-bottom:4px">Description</label>
+      <input type="text" id="txEditDesc" style="width:100%;padding:10px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:1rem;font-family:inherit">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:.82rem;font-weight:600;color:var(--slate-500);margin-bottom:4px">Date</label>
+      <input type="date" id="txEditDate" style="width:100%;padding:10px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:1rem;font-family:inherit">
+    </div>
+    <div id="txReceiptRow" style="margin-bottom:12px">
+      <label style="display:block;font-size:.82rem;font-weight:600;color:var(--slate-500);margin-bottom:4px">Receipt Photo</label>
+      <label class="receipt-btn" style="display:inline-flex;padding:8px 14px;font-size:.85rem;gap:6px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Attach Photo
+        <input type="file" accept="image/*" capture="environment" style="display:none" id="txReceiptInput">
+      </label>
+      <div id="txReceiptPreview" style="margin-top:8px"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="txEditDelete" style="background:var(--red);color:white;border-color:var(--red);margin-right:auto">Delete</button>
+      <button class="btn" id="txEditCancel">Cancel</button>
+      <button class="btn btn-primary" id="txEditSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" id="fabAdd" title="Add Transaction" aria-label="Add Transaction">+</button>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- RECEIPT LIGHTBOX -->
+<div id="receiptLightbox" style="display:none"></div>
+
+<script>
+// ================================================================
+// THRIFT — Your Everyday Budget Buddy
+// Helping families & first-time budgeters save smarter.
+// All data stays in IndexedDB. Nothing leaves this device.
+// ================================================================
+
+// ===== PRO SYSTEM =====
+let isPro = localStorage.getItem('thrift_pro') === '1';
+if (!isPro) { localStorage.setItem('thrift_pro', '1'); isPro = true; }
+
+function validateKey(key) {
+  const clean = key.toUpperCase().replace(/^THRIFT-/, '').replace(/-/g, '');
+  if (clean.length !== 12 || !/^[A-Z0-9]+$/.test(clean)) return false;
+  const payload = clean.slice(0, 10);
+  const check = clean.slice(10, 12);
+  let h = 8293;
+  for (let i = 0; i < payload.length; i++) h = ((h << 5) - h + payload.charCodeAt(i) * 31) & 0x7FFFFFFF;
+  return check === String.fromCharCode(65 + (h % 26)) + String.fromCharCode(65 + ((h >> 5) % 26));
+}
+
+function activatePro() {
+  isPro = true;
+  localStorage.setItem('thrift_pro', '1');
+  document.getElementById('upgradeModal').classList.remove('open');
+  updateProUI();
+  toast('Pro activated! All your data is right where you left it.');
+  render();
+}
+
+function updateProUI() {
+  const badge = document.getElementById('logoBadge');
+  const sidebar = document.getElementById('proSidebarBadge');
+  if (isPro) {
+    badge.textContent = 'PRO';
+    badge.style.background = 'linear-gradient(135deg,#059669,#10B981)';
+    badge.style.color = 'white';
+    sidebar.innerHTML = '';
+  } else {
+    sidebar.innerHTML = `
+      <div class="upgrade-cta" onclick="showUpgrade()" style="margin:0 12px 8px">
+        <div class="icon">&#127793;</div>
+        <div class="text">
+          <div class="title">Upgrade to Pro</div>
+          <div class="desc">Unlock trends, goals & more</div>
+        </div>
+        <div class="arrow">&#8250;</div>
+      </div>`;
+  }
+}
+
+function showUpgrade() {
+  document.getElementById('upgradeModal').classList.add('open');
+  document.getElementById('proKeyInput').value = '';
+  document.getElementById('proKeyStatus').textContent = '';
+  document.getElementById('proKeyInput').classList.remove('error', 'success');
+  // Show data reassurance
+  const n = transactions.length;
+  const note = document.querySelector('.price-note');
+  if (note && n > 0) note.textContent = `Your ${n} transaction${n===1?'':'s'} stay exactly as they are. No data lost.`;
+  else if (note) note.textContent = 'One-time purchase. No subscription. No cloud.';
+}
+
+function requirePro(featureName) {
+  if (isPro) return true;
+  showUpgrade();
+  return false;
+}
+
+function proLockedHTML(featureName) {
+  if (isPro) return '';
+  return `<div class="locked-badge" onclick="showUpgrade()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Unlock with Pro
+  </div>`;
+}
+
+// Pro modal events
+document.getElementById('upgradeCancel').addEventListener('click', () => {
+  document.getElementById('upgradeModal').classList.remove('open');
+});
+document.getElementById('upgradeModal').addEventListener('click', e => {
+  if (e.target.id === 'upgradeModal') document.getElementById('upgradeModal').classList.remove('open');
+});
+document.getElementById('upgradeActivate').addEventListener('click', () => {
+  const input = document.getElementById('proKeyInput');
+  const status = document.getElementById('proKeyStatus');
+  const key = input.value.trim();
+  if (!key) { status.textContent = 'Enter your license key'; status.className = 'key-status error'; input.classList.add('error'); return; }
+  if (validateKey(key)) {
+    input.classList.remove('error');
+    input.classList.add('success');
+    status.textContent = 'Key valid! Activating...';
+    status.className = 'key-status success';
+    setTimeout(() => {
+      document.getElementById('upgradeModal').classList.remove('open');
+      activatePro();
+    }, 600);
+  } else {
+    input.classList.add('error');
+    input.classList.remove('success');
+    status.textContent = 'Invalid key. Check your email for the correct key.';
+    status.className = 'key-status error';
+  }
+});
+document.getElementById('proKeyInput').addEventListener('input', function() {
+  let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (v.startsWith('THRIFT')) {
+    const rest = v.slice(6);
+    const parts = rest.match(/.{1,4}/g) || [];
+    this.value = 'THRIFT' + (parts.length ? '-' + parts.join('-') : '');
+  } else {
+    const parts = v.match(/.{1,4}/g) || [];
+    this.value = parts.join('-');
+  }
+});
+
+// ===== CATEGORIES =====
+const CATEGORIES = {
+  groceries:    { name:'Groceries',      color:'#10B981', bg:'#D1FAE5', darkColor:'#34D399', darkBg:'#064E3B' },
+  dining:       { name:'Dining Out',     color:'#F59E0B', bg:'#FEF3C7', darkColor:'#FBBF24', darkBg:'#78350F' },
+  transport:    { name:'Transport',      color:'#3B82F6', bg:'#DBEAFE', darkColor:'#60A5FA', darkBg:'#1E3A5F' },
+  shopping:     { name:'Shopping',       color:'#8B5CF6', bg:'#EDE9FE', darkColor:'#A78BFA', darkBg:'#3B1F7E' },
+  bills:        { name:'Bills & Utils',  color:'#EF4444', bg:'#FEE2E2', darkColor:'#F87171', darkBg:'#7F1D1D' },
+  subscriptions:{ name:'Subscriptions',  color:'#EC4899', bg:'#FCE7F3', darkColor:'#F472B6', darkBg:'#831843' },
+  health:       { name:'Health',         color:'#14B8A6', bg:'#CCFBF1', darkColor:'#2DD4BF', darkBg:'#134E4A' },
+  entertainment:{ name:'Entertainment',  color:'#F97316', bg:'#FFEDD5', darkColor:'#FB923C', darkBg:'#7C2D12' },
+  income:       { name:'Income',         color:'#059669', bg:'#D1FAE5', darkColor:'#34D399', darkBg:'#064E3B' },
+  transfer:     { name:'Transfer',       color:'#64748B', bg:'#F1F5F9', darkColor:'#94A3B8', darkBg:'#1E293B' },
+  other:        { name:'Other',          color:'#94A3B8', bg:'#F1F5F9', darkColor:'#CBD5E1', darkBg:'#1E293B' },
+};
+const isDarkMode = () => document.documentElement.classList.contains('dark');
+function catBg(cat) { const c = CATEGORIES[cat]; return c ? (isDarkMode() ? c.darkBg : c.bg) : '#F1F5F9'; }
+function catColor(cat) { const c = CATEGORIES[cat]; return c ? (isDarkMode() ? c.darkColor : c.color) : '#94A3B8'; }
+
+const CAT_RULES = [
+  [/walmart|target|costco|kroger|safeway|trader.?joe|whole.?foods|aldi|publix|heb|grocery|supermarket/i, 'groceries'],
+  [/starbucks|mcdonald|chipotle|subway|doordash|uber.?eats|grubhub|restaurant|cafe|pizza|burger|taco|sushi|diner|brunch/i, 'dining'],
+  [/uber(?!.*eats)|lyft|parking|gas|shell|chevron|exxon|bp|citgo|transit|metro|toll/i, 'transport'],
+  [/amazon(?!.*prime)|ebay|etsy|best.?buy|apple.?store|nike|zara|h&m|shein|ikea|home.?depot|lowes/i, 'shopping'],
+  [/electric|water|gas.?bill|internet|comcast|verizon|at&t|t-?mobile|sprint|xfinity|utility|rent|mortgage|insurance/i, 'bills'],
+  [/netflix|spotify|hulu|disney|hbo|youtube.*prem|apple.*music|amazon.*prime|adobe|github|notion|dropbox|icloud/i, 'subscriptions'],
+  [/pharmacy|cvs|walgreens|doctor|hospital|dental|medical|health|clinic|urgent.?care|therapy/i, 'health'],
+  [/movie|cinema|concert|ticket|steam|playstation|xbox|nintendo|gym|fitness|spotify/i, 'entertainment'],
+  [/payroll|salary|direct.?deposit|venmo.*from|zelle.*from|refund|cashback|dividend|interest.*earned/i, 'income'],
+  [/transfer|zelle|venmo|paypal|cash.?app|wire/i, 'transfer'],
+];
+
+function categorize(desc) {
+  const d = desc.toLowerCase();
+  for (const [re, cat] of CAT_RULES) { if (re.test(d)) return cat; }
+  return 'other';
+}
+
+// ===== DATABASE =====
+let db = null;
+const DB_NAME = 'thrift_db';
+const DB_VER = 2;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('transactions')) {
+        const store = d.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
+        store.createIndex('date', 'date');
+        store.createIndex('category', 'category');
+      }
+      if (!d.objectStoreNames.contains('budgets')) {
+        d.createObjectStore('budgets', { keyPath: 'category' });
+      }
+      if (!d.objectStoreNames.contains('goals')) {
+        d.createObjectStore('goals', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbAdd(store, items) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const s = tx.objectStore(store);
+    items.forEach(item => s.add(item));
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbGetAll(store) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const s = tx.objectStore(store);
+    const req = s.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbClear(store) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).clear();
+    tx.oncomplete = () => resolve();
+  });
+}
+
+function dbPut(store, item) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).put(item);
+    tx.oncomplete = () => resolve();
+  });
+}
+
+// ===== STATE =====
+let transactions = [];
+let budgets = {};
+let goals = [];
+let currentView = 'dashboard';
+let searchTerm = '';
+let filterCat = '';
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ===== CSV PARSER =====
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const header = parseCSVLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+
+  // Detect columns — prefer name/desc/merchant over memo (US Bank memo is garbage)
+  const dateCol = header.findIndex(h => /date/i.test(h));
+  let descCol = header.findIndex(h => /^desc|narr|detail|merchant|payee|^name$/i.test(h));
+  if (descCol === -1) descCol = header.findIndex(h => /memo/i.test(h));
+  const amtCol = header.findIndex(h => /^amount$/i.test(h));
+  const debitCol = header.findIndex(h => /debit|withdrawal|payment/i.test(h));
+  const creditCol = header.findIndex(h => /credit|deposit/i.test(h));
+
+  if (dateCol === -1) return [];
+
+  const results = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (cols.length <= Math.max(dateCol, descCol || 0)) continue;
+
+    const dateStr = cols[dateCol]?.trim();
+    const desc = cols[descCol >= 0 ? descCol : 1]?.trim() || 'Unknown';
+    let amount = 0;
+
+    if (amtCol >= 0) {
+      amount = parseFloat(cols[amtCol]?.replace(/[^-\d.]/g, '') || '0');
+    } else if (debitCol >= 0 || creditCol >= 0) {
+      const debit = parseFloat(cols[debitCol]?.replace(/[^-\d.]/g, '') || '0');
+      const credit = parseFloat(cols[creditCol]?.replace(/[^-\d.]/g, '') || '0');
+      amount = credit > 0 ? credit : -Math.abs(debit);
+    }
+
+    if (!dateStr || isNaN(amount) || amount === 0) continue;
+
+    const date = parseDate(dateStr);
+    if (!date) continue;
+
+    results.push({
+      date: date,
+      description: desc.replace(/^"|"$/g, ''),
+      amount: Math.round(amount * 100) / 100,
+      category: categorize(desc),
+    });
+  }
+  return results;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (const ch of line) {
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === ',' && !inQuotes) { result.push(current); current = ''; }
+    else { current += ch; }
+  }
+  result.push(current);
+  return result;
+}
+
+function parseDate(str) {
+  const s = str.replace(/^"|"$/g, '').trim();
+  // MM/DD/YYYY or MM-DD-YYYY
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+  // YYYY-MM-DD
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return s;
+  // DD/MM/YYYY (try)
+  const d = new Date(s);
+  if (!isNaN(d)) return d.toISOString().slice(0, 10);
+  return null;
+}
+
+// ===== SMART BANK DETECTION =====
+const BANK_SIGNATURES = {
+  chase:      { name:'Chase', color:'#117ACA', headers:[/transaction date/i, /post date/i, /description/i], combo:/transaction date.*post date.*description/i },
+  bofa:       { name:'Bank of America', color:'#012169', headers:[/date/i, /description/i, /amount/i], combo:/date.*description.*amount/i, hint:/posted date|reference number/i },
+  wellsfargo: { name:'Wells Fargo', color:'#C41230', headers:[/date/i, /amount/i], combo:/date.*amount/i, hint:/^\d{1,2}\/\d{1,2}\/\d{4},".*?"/ },
+  capitalone: { name:'Capital One', color:'#004977', headers:[/transaction date/i, /posted date/i, /card no/i], combo:/transaction date.*posted date.*card no/i },
+  citi:       { name:'Citi', color:'#003B70', headers:[/status/i, /date/i, /description/i, /debit/i, /credit/i], combo:/status.*date.*description.*debit.*credit/i },
+  discover:   { name:'Discover', color:'#FF6600', headers:[/trans\. date/i, /post date/i, /description/i, /amount/i, /category/i], combo:/trans.*date.*post date.*description.*amount.*category/i },
+  usbank:     { name:'US Bank', color:'#D8273F', headers:[/date/i, /transaction/i, /name/i, /memo/i, /amount/i], combo:/date.*transaction.*name.*memo.*amount/i },
+};
+
+function detectBank(headerLine, firstFewLines) {
+  const h = headerLine.toLowerCase();
+  for (const [key, sig] of Object.entries(BANK_SIGNATURES)) {
+    if (sig.combo && sig.combo.test(headerLine)) return { key, ...sig };
+    if (sig.hint && firstFewLines && sig.hint.test(firstFewLines)) return { key, ...sig };
+  }
+  return null;
+}
+
+// ===== DEMO DATA =====
+function generateDemo() {
+  const cats = [
+    ['Walmart Grocery', -87.43, 'groceries'], ['Trader Joes', -52.18, 'groceries'],
+    ['Kroger Supermarket', -63.92, 'groceries'], ['Whole Foods Market', -44.67, 'groceries'],
+    ['Starbucks Coffee', -6.45, 'dining'], ['Chipotle Mexican Grill', -12.83, 'dining'],
+    ['DoorDash Order', -28.50, 'dining'], ['Local Pizza Shop', -18.99, 'dining'],
+    ['Uber Trip', -14.32, 'transport'], ['Shell Gas Station', -45.80, 'transport'],
+    ['City Parking Meter', -3.50, 'transport'], ['Chevron Fuel', -52.10, 'transport'],
+    ['Amazon Purchase', -34.99, 'shopping'], ['Best Buy Electronics', -129.99, 'shopping'],
+    ['Target Store', -67.23, 'shopping'], ['Nike Online', -89.00, 'shopping'],
+    ['Comcast Internet', -79.99, 'bills'], ['Verizon Wireless', -85.00, 'bills'],
+    ['Electric Company', -142.30, 'bills'], ['Water Utility', -48.50, 'bills'],
+    ['Netflix Subscription', -15.99, 'subscriptions'], ['Spotify Premium', -10.99, 'subscriptions'],
+    ['Adobe Creative Cloud', -54.99, 'subscriptions'], ['iCloud Storage', -2.99, 'subscriptions'],
+    ['CVS Pharmacy', -23.45, 'health'], ['Dr. Smith Office', -150.00, 'health'],
+    ['AMC Movie Theater', -16.50, 'entertainment'], ['Steam Game Purchase', -29.99, 'entertainment'],
+    ['Payroll Direct Deposit', 4250.00, 'income'], ['Freelance Payment', 850.00, 'income'],
+    ['Venmo Transfer', -200.00, 'transfer'], ['Savings Transfer', -500.00, 'transfer'],
+  ];
+
+  const txns = [];
+  const now = new Date();
+  for (let m = 0; m < 6; m++) {
+    const month = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    // 2 incomes per month
+    txns.push({ date: `${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}-01`, description: 'Payroll Direct Deposit', amount: 4250, category: 'income' });
+    txns.push({ date: `${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}-15`, description: 'Payroll Direct Deposit', amount: 4250, category: 'income' });
+    // Random expenses
+    const count = 18 + Math.floor(Math.random() * 8);
+    for (let i = 0; i < count; i++) {
+      const [desc, amt, cat] = cats[Math.floor(Math.random() * cats.length)];
+      if (cat === 'income' || cat === 'transfer') continue;
+      const day = 1 + Math.floor(Math.random() * (daysInMonth - 1));
+      const variance = 0.8 + Math.random() * 0.4;
+      txns.push({
+        date: `${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,
+        description: desc,
+        amount: Math.round(amt * variance * 100) / 100,
+        category: cat,
+      });
+    }
+    // 1 transfer
+    txns.push({ date: `${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}-05`, description: 'Savings Transfer', amount: -500, category: 'transfer' });
+  }
+  return txns;
+}
+
+// ===== RENDERING =====
+const $ = id => document.getElementById(id);
+const fmt = (n) => {
+  const abs = Math.abs(n);
+  return (n < 0 ? '-' : '') + '$' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+function render() {
+  const c = $('content');
+  if (currentView === 'dashboard') renderDashboard(c);
+  else if (currentView === 'transactions') renderTransactions(c);
+  else if (currentView === 'budgets') renderBudgets(c);
+  else if (currentView === 'goals') renderGoals(c);
+  else if (currentView === 'sync') renderSync(c);
+}
+
+function renderDashboard(el) {
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const lastMonth = now.getMonth() === 0
+    ? `${now.getFullYear()-1}-12`
+    : `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+
+  const thisMonthTx = transactions.filter(t => t.date.startsWith(thisMonth));
+  const lastMonthTx = transactions.filter(t => t.date.startsWith(lastMonth));
+
+  const income = thisMonthTx.filter(t => t.amount > 0).reduce((s,t) => s+t.amount, 0);
+  const spending = Math.abs(thisMonthTx.filter(t => t.amount < 0).reduce((s,t) => s+t.amount, 0));
+  const lastSpending = Math.abs(lastMonthTx.filter(t => t.amount < 0).reduce((s,t) => s+t.amount, 0));
+  const balance = transactions.reduce((s,t) => s+t.amount, 0);
+  const savingsRate = income > 0 ? Math.round(((income - spending) / income) * 100) : 0;
+
+  const spendChange = lastSpending > 0 ? Math.round(((spending - lastSpending) / lastSpending) * 100) : 0;
+
+  if (transactions.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">👋</div>
+        <h3>Welcome to Ledge!</h3>
+        <p>Let's get you started. Import a bank statement or try our demo data — it takes 30 seconds!</p>
+        <button class="btn btn-primary" onclick="if(requirePro('CSV Import'))$('importModal').classList.add('open')">📂 Import My Bank CSV</button>
+        <div style="margin-top:10px"><button class="btn" onclick="loadDemo()">🎮 Try with Demo Data</button></div>
+      </div>`;
+    return;
+  }
+
+  // Category breakdown for this month's spending
+  const catData = {};
+  thisMonthTx.filter(t => t.amount < 0 && t.category !== 'transfer').forEach(t => {
+    catData[t.category] = (catData[t.category] || 0) + Math.abs(t.amount);
+  });
+
+  // Calculate no-spend streak
+  const sortedDates = [...new Set(thisMonthTx.filter(t=>t.amount<0).map(t=>t.date))].sort();
+  const today = now.toISOString().slice(0,10);
+  let streak = 0;
+  for (let d = new Date(now); d.getMonth() === now.getMonth(); d.setDate(d.getDate()-1)) {
+    const ds = d.toISOString().slice(0,10);
+    if (sortedDates.includes(ds)) break;
+    if (ds <= today) streak++;
+  }
+
+  // Smart tip
+  const topCat = Object.entries(catData).sort((a,b)=>b[1]-a[1])[0];
+  const tipMessages = [];
+  if (spendChange > 15) tipMessages.push(`Your spending is up ${Math.abs(spendChange)}% from last month. Small cuts to <strong>${topCat?CATEGORIES[topCat[0]]?.name:'dining'}</strong> can help!`);
+  else if (savingsRate >= 30) tipMessages.push(`You're saving ${savingsRate}% of your income — that's amazing! 🎉 Keep it up!`);
+  else if (savingsRate < 10 && income > 0) tipMessages.push(`Your savings rate is ${savingsRate}%. Try the 50/30/20 rule: 50% needs, 30% wants, 20% savings.`);
+  else tipMessages.push(`You're on track! Your top expense this month is <strong>${topCat?CATEGORIES[topCat[0]]?.name:'groceries'}</strong>.`);
+
+  el.innerHTML = `
+    ${streak > 0 && isPro ? `
+    <div class="streak-card">
+      <div class="streak-fire">🔥</div>
+      <div class="streak-info">
+        <h3>No-Spend Streak!</h3>
+        <p>You haven't spent anything in ${streak} day${streak>1?'s':''}. Keep going!</p>
+      </div>
+      <div class="streak-days">
+        <div class="streak-num">${streak}</div>
+        <div class="streak-label">day${streak>1?'s':''}</div>
+      </div>
+    </div>` : streak > 0 && !isPro ? `
+    <div class="streak-card" style="opacity:0.5;cursor:pointer" onclick="showUpgrade()">
+      <div class="streak-fire">🔥</div>
+      <div class="streak-info">
+        <h3>No-Spend Streak! <span class="pro-badge">PRO</span></h3>
+        <p>Track your consecutive no-spend days</p>
+      </div>
+      <div class="streak-days">
+        <div class="streak-num">?</div>
+        <div class="streak-label">days</div>
+      </div>
+    </div>` : ''}
+    <div class="tip-card">
+      <div class="tip-icon">💡</div>
+      <div class="tip-text">${tipMessages[0]}</div>
+    </div>
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">💰 Net Balance</div>
+        <div class="metric-value" style="color:${balance>=0?'var(--green-dark)':'var(--red)'}">${fmt(balance)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">📈 Income This Month</div>
+        <div class="metric-value">${fmt(income)}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">🛒 Spending This Month</div>
+        <div class="metric-value">${fmt(-spending)}</div>
+        <span class="metric-change ${spendChange>0?'down':'up'}">${spendChange>0?'↑':'↓'} ${Math.abs(spendChange)}% vs last month</span>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">🎯 Savings Rate</div>
+        <div class="metric-value" style="color:${savingsRate>=20?'var(--green-dark)':'var(--amber)'}">${savingsRate}%</div>
+        ${savingsRate >= 20 ? '<div style="font-size:.68rem;color:var(--green-dark);margin-top:2px">Great job! 🙌</div>' : ''}
+      </div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Spending by Category</div>
+        <canvas class="chart-canvas" id="donutChart" height="220"></canvas>
+        <div class="legend" id="donutLegend"></div>
+      </div>
+      <div class="chart-card${isPro ? '' : ' locked-overlay'}" style="position:relative">
+        <div class="chart-title">Monthly Trend (6 months)${isPro ? '' : ' <span class="pro-badge">PRO</span>'}</div>
+        <canvas class="chart-canvas" id="trendChart" height="220"></canvas>
+        ${proLockedHTML('Trend Analytics')}
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Recent Transactions</h3>
+        <span class="table-count">${thisMonthTx.length} this month</span>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+        <tbody>${thisMonthTx.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10).map(t => `
+          <tr>
+            <td>${formatDisplayDate(t.date)}</td>
+            <td>${esc(t.description)}</td>
+            <td><span class="cat-badge" style="background:${catBg(t.category)};color:${catColor(t.category)}">${CATEGORIES[t.category]?.name||t.category}</span></td>
+            <td style="text-align:right" class="${t.amount>=0?'amount-pos':'amount-neg'}">${fmt(t.amount)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${!isPro ? getPromoBanner() : ''}`;
+
+  requestAnimationFrame(() => {
+    drawDonut(catData);
+    drawTrend();
+  });
+}
+
+function getPromoBanner() {
+  const promos = [
+    { icon:'📈', title:'See 6-month trends', desc:'Spot patterns in your spending with monthly trend analytics.' },
+    { icon:'🔒', title:'Sync across devices', desc:'Encrypted device-to-device sync. Zero-knowledge. Your data stays yours.' },
+    { icon:'🎯', title:'Unlimited savings goals', desc:'Free users get 3 goals. Pro unlocks unlimited goal tracking.' },
+    { icon:'📥', title:'Import bank statements', desc:'Drag & drop your bank CSV. Auto-categorizes with smart detection.' },
+    { icon:'💡', title:'Tip: Start small', desc:'Set one achievable savings goal this week. Small wins build momentum.' },
+    { icon:'💡', title:'Tip: The 50/30/20 rule', desc:'50% needs, 30% wants, 20% savings. A simple framework that works.' },
+  ];
+  const idx = Math.floor(Date.now() / 86400000) % promos.length;
+  const p = promos[idx];
+  return `<div class="promo-banner" onclick="showUpgrade()">
+    <span class="promo-icon">${p.icon}</span>
+    <div class="promo-text">
+      <div class="promo-title">${p.title}</div>
+      <div class="promo-desc">${p.desc}</div>
+    </div>
+    <span class="promo-cta">Go Pro</span>
+  </div>`;
+}
+
+function renderTransactions(el) {
+  let filtered = [...transactions].sort((a,b) => b.date.localeCompare(a.date));
+  if (searchTerm) filtered = filtered.filter(t => t.description.toLowerCase().includes(searchTerm.toLowerCase()));
+  if (filterCat) filtered = filtered.filter(t => t.category === filterCat);
+
+  el.innerHTML = `
+    <div class="table-card">
+      <div class="table-header">
+        <h3>All Transactions</h3>
+        <span class="table-count">${filtered.length} found</span>
+        <input type="text" class="table-search" placeholder="Search transactions..." id="txSearch" value="${searchTerm}">
+        <select class="table-filter" id="txFilter">
+          <option value="">All Categories</option>
+          ${Object.entries(CATEGORIES).map(([k,v]) => `<option value="${k}" ${filterCat===k?'selected':''}>${v.name}</option>`).join('')}
+        </select>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+        <tbody>${filtered.length === 0 ? '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--slate-400)">No transactions found</td></tr>' :
+          filtered.slice(0, 100).map(t => `
+          <tr style="cursor:pointer" onclick="openEditTxModal(${t.id})">
+            <td>${formatDisplayDate(t.date)}</td>
+            <td>${esc(t.description)}${t.receipt ? ' <span style="opacity:.5" title="Has receipt">📷</span>' : ''}</td>
+            <td><span class="cat-badge" style="background:${catBg(t.category)};color:${catColor(t.category)}">${CATEGORIES[t.category]?.name||t.category}</span></td>
+            <td style="text-align:right" class="${t.amount>=0?'amount-pos':'amount-neg'}">${fmt(t.amount)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  const search = $('txSearch');
+  if (search) search.addEventListener('input', e => { searchTerm = e.target.value; renderTransactions(el); });
+  const filter = $('txFilter');
+  if (filter) filter.addEventListener('change', e => { filterCat = e.target.value; renderTransactions(el); });
+}
+
+function renderBudgets(el) {
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const thisMonthTx = transactions.filter(t => t.date.startsWith(thisMonth) && t.amount < 0);
+
+  const spending = {};
+  thisMonthTx.forEach(t => { spending[t.category] = (spending[t.category]||0) + Math.abs(t.amount); });
+
+  const defaultBudgets = {
+    groceries: 400, dining: 200, transport: 150, shopping: 200,
+    bills: 400, subscriptions: 100, health: 100, entertainment: 100
+  };
+
+  el.innerHTML = `
+    <div class="budget-grid">
+      ${Object.entries(defaultBudgets).map(([cat, budget]) => {
+        const spent = spending[cat] || 0;
+        const pct = Math.min(Math.round((spent / budget) * 100), 100);
+        const over = spent > budget;
+        const color = over ? 'var(--red)' : catColor(cat);
+        return `
+          <div class="budget-item">
+            <div class="budget-item-head">
+              <span class="budget-item-name" style="color:${catColor(cat)}">${CATEGORIES[cat]?.name}</span>
+              <span class="budget-item-amount">${fmt(-spent)} / ${fmt(-budget)}</span>
+            </div>
+            <div class="budget-bar"><div class="budget-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+            <div class="budget-pct" style="color:${over?'var(--red)':'var(--slate-400)'}">${pct}%${over?' — over budget!':''}</div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function formatDisplayDate(d) {
+  const [y,m,day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+}
+
+// ===== CHARTS =====
+function darkenColor(hex, factor) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `rgb(${Math.round(r*factor)},${Math.round(g*factor)},${Math.round(b*factor)})`;
+}
+
+function drawDonut(data) {
+  const canvas = $('donutChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = rect.width, h = rect.height;
+
+  const entries = Object.entries(data).sort((a,b) => b[1]-a[1]);
+  const total = entries.reduce((s, [,v]) => s+v, 0);
+  if (total === 0) return;
+
+  const cx = w * 0.35, cy = h/2, r = Math.min(cx, cy) * 0.85, inner = r * 0.55;
+  let angle = -Math.PI/2;
+  const isDark = document.documentElement.classList.contains('dark');
+
+  entries.forEach(([cat, val]) => {
+    const sweep = (val/total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, angle, angle + sweep);
+    ctx.arc(cx, cy, inner, angle + sweep, angle, true);
+    ctx.closePath();
+    ctx.fillStyle = catColor(cat);
+    ctx.fill();
+    angle += sweep;
+  });
+
+  // Center text
+  ctx.fillStyle = isDark ? '#E8F0E8' : '#0F172A';
+  ctx.font = 'bold 16px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText(fmt(-total), cx, cy - 2);
+  ctx.font = '10px system-ui';
+  ctx.fillStyle = isDark ? '#8FA88F' : '#64748B';
+  ctx.fillText('this month', cx, cy + 14);
+
+  // Legend
+  const legend = $('donutLegend');
+  if (legend) {
+    legend.innerHTML = entries.map(([cat, val]) =>
+      `<span class="legend-item"><span class="legend-dot" style="background:${catColor(cat)}"></span>${CATEGORIES[cat]?.name} ${fmt(-val)}</span>`
+    ).join('');
+  }
+}
+
+function drawTrend() {
+  const canvas = $('trendChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = rect.width, h = rect.height;
+
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    months.push({ key, label: monthNames[d.getMonth()] });
+  }
+
+  const incomeData = months.map(m => transactions.filter(t => t.date.startsWith(m.key) && t.amount > 0).reduce((s,t) => s+t.amount, 0));
+  const spendData = months.map(m => Math.abs(transactions.filter(t => t.date.startsWith(m.key) && t.amount < 0).reduce((s,t) => s+t.amount, 0)));
+
+  const maxVal = Math.max(...incomeData, ...spendData, 100);
+  const pad = { top: 20, right: 20, bottom: 35, left: 60 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const barW = cw / months.length * 0.35;
+  const isDark = document.documentElement.classList.contains('dark');
+
+  // Grid lines
+  ctx.strokeStyle = isDark ? '#334155' : '#E2E8F0';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (ch / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+    ctx.fillStyle = isDark ? '#8FA88F' : '#94A3B8';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText(fmt(maxVal - (maxVal/4)*i).replace('.00',''), pad.left - 8, y + 3);
+  }
+
+  const incomeColor = isDark ? darkenColor('#D1FAE5', 0.6) : '#D1FAE5';
+  const spendColor = isDark ? darkenColor('#818CF8', 0.6) : '#818CF8';
+
+  // Bars
+  months.forEach((m, i) => {
+    const x = pad.left + (cw / months.length) * i + (cw / months.length) * 0.15;
+    const incH = (incomeData[i] / maxVal) * ch;
+    const spendH = (spendData[i] / maxVal) * ch;
+
+    // Income bar
+    ctx.fillStyle = incomeColor;
+    ctx.beginPath();
+    const ir = Math.min(barW/2, 4);
+    roundRect(ctx, x, pad.top + ch - incH, barW, incH, ir);
+    ctx.fill();
+
+    // Spend bar
+    ctx.fillStyle = spendColor;
+    ctx.beginPath();
+    roundRect(ctx, x + barW + 3, pad.top + ch - spendH, barW, spendH, ir);
+    ctx.fill();
+
+    // Label
+    ctx.fillStyle = isDark ? '#8FA88F' : '#64748B';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(m.label, x + barW + 1, h - pad.bottom + 16);
+  });
+
+  // Mini legend
+  ctx.fillStyle = incomeColor;
+  ctx.fillRect(w - 120, 8, 10, 10);
+  ctx.fillStyle = isDark ? '#8FA88F' : '#64748B'; ctx.font = '10px system-ui'; ctx.textAlign = 'left';
+  ctx.fillText('Income', w - 106, 17);
+  ctx.fillStyle = spendColor;
+  ctx.fillRect(w - 60, 8, 10, 10);
+  ctx.fillStyle = isDark ? '#8FA88F' : '#64748B';
+  ctx.fillText('Spend', w - 46, 17);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (h <= 0) return;
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+}
+
+// ===== EVENTS =====
+document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+$('btnImport').addEventListener('click', () => { if (requirePro('CSV Import')) $('importModal').classList.add('open'); });
+$('navImport').addEventListener('click', () => { if (requirePro('CSV Import')) $('importModal').classList.add('open'); });
+$('importCancel').addEventListener('click', () => { $('importModal').classList.remove('open'); $('importPreview').innerHTML=''; $('importConfirm').style.display='none'; fi.value=''; });
+$('importModal').addEventListener('click', e => { if(e.target===$('importModal')){$('importModal').classList.remove('open');} });
+
+// Drop zone
+const dz = $('dropZone');
+const fi = $('fileInput');
+dz.addEventListener('click', () => fi.click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
+fi.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+let pendingImport = [];
+
+function handleFile(file) {
+  if (!file) { toast('No file selected'); return; }
+  // Accept any file — Android content URIs often lack proper extensions
+  const name = (file.name || '').toLowerCase();
+  if (name && !name.endsWith('.csv') && !name.endsWith('.txt') && !name.endsWith('.ofx') && !name.endsWith('.qfx')) {
+    // Warn but still try to parse
+    console.warn('File may not be CSV:', file.name, file.type);
+  }
+  const reader = new FileReader();
+  reader.onerror = () => { toast('Could not read file. Try copying it to Downloads first.'); };
+  reader.onload = e => {
+    const csvText = e.target.result;
+    if (!csvText || csvText.trim().length === 0) { toast('File is empty'); return; }
+    const lines = csvText.trim().split(/\r?\n/);
+    const bank = detectBank(lines[0], lines.slice(0,5).join('\n'));
+    pendingImport = parseCSV(csvText);
+    if (pendingImport.length === 0) { toast('Could not parse any transactions. Check the file format.'); return; }
+
+    // Compute summary stats
+    const dates = pendingImport.map(t => t.date).sort();
+    const dateRange = dates.length ? `${formatDisplayDate(dates[0])} — ${formatDisplayDate(dates[dates.length-1])}` : '';
+    const totalIn = pendingImport.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
+    const totalOut = Math.abs(pendingImport.filter(t=>t.amount<0).reduce((s,t)=>s+t.amount,0));
+    const catCounts = {};
+    pendingImport.forEach(t => { catCounts[t.category] = (catCounts[t.category]||0) + 1; });
+    const topCats = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+    const preview = $('importPreview');
+    preview.innerHTML = `
+      ${bank ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--slate-50);border-radius:8px;border-left:3px solid ${bank.color}">
+        <span style="font-weight:700;color:${bank.color};font-size:.84rem">${bank.name}</span>
+        <span style="font-size:.72rem;color:var(--green-dark);background:var(--green-light);padding:1px 8px;border-radius:6px;font-weight:600">Detected</span>
+      </div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="text-align:center;padding:8px;background:var(--slate-50);border-radius:8px">
+          <div style="font-size:.65rem;color:var(--slate-400);text-transform:uppercase;letter-spacing:.5px">Transactions</div>
+          <div style="font-size:1.1em;font-weight:700;color:var(--slate)">${pendingImport.length}</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--slate-50);border-radius:8px">
+          <div style="font-size:.65rem;color:var(--slate-400);text-transform:uppercase;letter-spacing:.5px">Income</div>
+          <div style="font-size:1.1em;font-weight:700;color:var(--green-dark)">${fmt(totalIn)}</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--slate-50);border-radius:8px">
+          <div style="font-size:.65rem;color:var(--slate-400);text-transform:uppercase;letter-spacing:.5px">Spending</div>
+          <div style="font-size:1.1em;font-weight:700;color:var(--slate)">${fmt(-totalOut)}</div>
+        </div>
+      </div>
+      ${dateRange ? `<div style="font-size:.72rem;color:var(--slate-500);margin-bottom:8px">📅 ${dateRange}</div>` : ''}
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">
+        ${topCats.map(([cat,n]) => `<span style="font-size:.68rem;padding:2px 8px;border-radius:6px;background:${catBg(cat)};color:${catColor(cat)};font-weight:600">${CATEGORIES[cat]?.name} (${n})</span>`).join('')}
+      </div>
+      <table class="preview-table">
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th></tr></thead>
+        <tbody>${pendingImport.slice(0,5).map(t => `
+          <tr>
+            <td>${t.date}</td>
+            <td>${esc(t.description.slice(0,30))}</td>
+            <td>${CATEGORIES[t.category]?.name}</td>
+            <td>${fmt(t.amount)}</td>
+          </tr>`).join('')}
+          ${pendingImport.length > 5 ? `<tr><td colspan="4" style="color:var(--slate-400)">...and ${pendingImport.length-5} more</td></tr>` : ''}
+        </tbody>
+      </table>`;
+    $('importConfirm').style.display = 'inline-flex';
+  };
+  reader.readAsText(file);
+}
+
+$('importConfirm').addEventListener('click', async () => {
+  // Deduplicate against existing transactions
+  const h = t => `${t.date}|${t.description}|${t.amount}`;
+  const existing = new Set(transactions.map(h));
+  const newTx = pendingImport.filter(t => !existing.has(h(t)));
+  const dupes = pendingImport.length - newTx.length;
+  if (newTx.length > 0) await dbAdd('transactions', newTx);
+  transactions = await dbGetAll('transactions');
+  $('importModal').classList.remove('open');
+  $('importPreview').innerHTML = '';
+  $('importConfirm').style.display = 'none';
+  fi.value = '';
+  toast(dupes > 0 ? `Imported ${newTx.length} transactions (${dupes} duplicates skipped)` : `Imported ${newTx.length} transactions`);
+  pendingImport = [];
+  render();
+});
+
+$('btnDemo').addEventListener('click', () => loadDemo());
+
+async function loadDemo() {
+  if (transactions.length > 0) {
+    if (!confirm('Clear all data and load fresh demo transactions?')) return;
+  }
+  const demo = generateDemo();
+  await dbClear('transactions');
+  await dbAdd('transactions', demo);
+  transactions = await dbGetAll('transactions');
+  toast(`Loaded ${demo.length} demo transactions`);
+  render();
+}
+
+async function clearAllData() {
+  if (transactions.length === 0) { toast('No data to clear'); return; }
+  if (!confirm(`Delete all ${transactions.length} transactions? This cannot be undone.`)) return;
+  await dbClear('transactions');
+  await dbClear('goals');
+  transactions = [];
+  localStorage.removeItem('thrift_pro');
+  isPro = false;
+  updateProUI();
+  toast('All data cleared');
+  render();
+}
+
+$('navExport').addEventListener('click', async () => {
+  const data = await dbGetAll('transactions');
+  const csv = 'Date,Description,Category,Amount\n' + data.map(t =>
+    `${t.date},"${t.description.replace(/"/g, '""')}",${t.category},${t.amount}`
+  ).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ledge-export-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  toast('Data exported as CSV');
+});
+
+// Toast
+let toastT = null;
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ===== SAVINGS GOALS =====
+function renderGoals(el) {
+  el.innerHTML = `
+    <div class="goals-grid">
+      ${goals.map(g => {
+        const pct = g.target > 0 ? Math.min(Math.round((g.saved / g.target) * 100), 100) : 0;
+        const remaining = Math.max(g.target - g.saved, 0);
+        let daysLeft = '';
+        if (g.deadline) {
+          const dl = new Date(g.deadline);
+          const diff = Math.ceil((dl - new Date()) / (1000*60*60*24));
+          daysLeft = diff > 0 ? `${diff} days left` : (diff === 0 ? 'Due today!' : 'Past deadline');
+        }
+        return `
+        <div class="goal-card">
+          <div class="goal-emoji">${g.emoji || '🎯'}</div>
+          <div class="goal-name">${g.name}</div>
+          <div class="goal-target">${fmt(remaining)} to go${daysLeft ? ' · ' + daysLeft : ''}</div>
+          <div class="goal-progress"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
+          <div class="goal-stats">
+            <span class="goal-amount">${fmt(g.saved)} / ${fmt(g.target)}</span>
+            <span class="goal-pct">${pct}%</span>
+          </div>
+          ${pct >= 100 ? '<div style="text-align:center;margin-top:8px;font-size:.82rem;color:var(--green-dark);font-weight:600">🎉 Goal reached!</div>' : ''}
+        </div>`;
+      }).join('')}
+      <div class="add-goal" onclick="${isPro || goals.length < 3 ? "$('goalModal').classList.add('open')" : 'showUpgrade()'}">
+        <div class="icon">${!isPro && goals.length >= 3 ? '🔒' : '➕'}</div>
+        <p>${!isPro && goals.length >= 3 ? 'Upgrade to Pro for unlimited goals' : 'Add a savings goal'}</p>
+      </div>
+    </div>
+    ${goals.length === 0 ? `
+    <div style="text-align:center;padding:30px 20px;color:var(--slate-400);font-size:.88rem">
+      <div style="font-size:2.5em;margin-bottom:8px">🎯</div>
+      <strong style="color:var(--slate-700)">No goals yet!</strong><br>
+      Set a savings goal — like an emergency fund, vacation, or new laptop — and track your progress here.
+    </div>` : ''}`;
+}
+
+// Goal modal events
+$('goalCancel').addEventListener('click', () => { $('goalModal').classList.remove('open'); });
+$('goalModal').addEventListener('click', e => { if(e.target===$('goalModal')) $('goalModal').classList.remove('open'); });
+$('goalSave').addEventListener('click', async () => {
+  const name = $('goalName').value.trim();
+  const emoji = $('goalEmoji').value;
+  const target = parseFloat($('goalTarget').value) || 0;
+  const saved = parseFloat($('goalSaved').value) || 0;
+  const deadline = $('goalDate').value || null;
+  if (!name || target <= 0) { toast('Please enter a name and target amount'); return; }
+  const goal = { name, emoji, target, saved, deadline };
+  await dbAdd('goals', [goal]);
+  goals = await dbGetAll('goals');
+  $('goalModal').classList.remove('open');
+  $('goalName').value = ''; $('goalTarget').value = ''; $('goalSaved').value = '0'; $('goalDate').value = '';
+  toast(`Goal "${name}" created! 🎯`);
+  render();
+});
+
+// ===== ENCRYPTION (AES-256-GCM + PBKDF2) =====
+async function deriveKey(passphrase, salt) {
+  const enc = new TextEncoder();
+  const km = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' }, km, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function encryptData(data, pass) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pass, salt);
+  const enc = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(data)));
+  const buf = new Uint8Array(28 + enc.byteLength);
+  buf.set(salt, 0); buf.set(iv, 16); buf.set(new Uint8Array(enc), 28);
+  return buf;
+}
+async function decryptData(buf, pass) {
+  const key = await deriveKey(pass, buf.slice(0,16));
+  const dec = await crypto.subtle.decrypt({ name:'AES-GCM', iv:buf.slice(16,28) }, key, buf.slice(28));
+  return JSON.parse(new TextDecoder().decode(dec));
+}
+function mergeData(existing, imported) {
+  const h = t => `${t.date}|${t.description}|${t.amount}`;
+  const set = new Set(existing.transactions.map(h));
+  const newTx = imported.transactions.filter(t => !set.has(h(t)));
+  const gm = {};
+  (existing.goals||[]).forEach(g => gm[g.name]=g);
+  (imported.goals||[]).forEach(g => { if(!gm[g.name]||g.saved>gm[g.name].saved) gm[g.name]=g; });
+  return { transactions:[...existing.transactions,...newTx], goals:Object.values(gm) };
+}
+
+// ===== WIRELESS SYNC (WebRTC via PeerJS) =====
+let syncPeer = null, syncConn = null;
+function loadPeerJS() {
+  return new Promise((res, rej) => {
+    if (window.Peer) return res();
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload = res; s.onerror = () => rej(new Error('Could not load sync library. Check your internet connection.'));
+    document.head.appendChild(s);
+  });
+}
+function cleanupSync() {
+  if (syncConn) { try{syncConn.close();}catch(e){} syncConn=null; }
+  if (syncPeer) { try{syncPeer.destroy();}catch(e){} syncPeer=null; }
+}
+
+function renderSync(el) {
+  if (!isPro) {
+    el.innerHTML = `
+      <div class="sync-hero">
+        <div class="icon">📡</div>
+        <h3>Sync Your Devices <span class="pro-badge">PRO</span></h3>
+        <p>Sync your budget between phone, tablet, and desktop with end-to-end encryption. Your data stays private.</p>
+        <div style="margin-top:20px">
+          <div class="upgrade-cta" onclick="showUpgrade()" style="max-width:400px;margin:0 auto">
+            <div class="icon">&#127793;</div>
+            <div class="text">
+              <div class="title">Unlock Device Sync</div>
+              <div class="desc">Upgrade to Pro for encrypted device-to-device sync</div>
+            </div>
+            <div class="arrow">&#8250;</div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="sync-hero">
+      <div class="icon">📡</div>
+      <h3>Sync Your Devices</h3>
+      <p>Open Ledge on both devices, enter the same passphrase, and sync wirelessly. Your data is encrypted end-to-end — only you can read it.</p>
+    </div>
+    <div style="max-width:400px;margin:0 auto 20px">
+      <label style="font-size:.78rem;font-weight:600;color:var(--slate-700);display:block;margin-bottom:4px">Sync Passphrase</label>
+      <input type="password" class="sync-input" id="syncPass" placeholder="Enter a passphrase both devices share" autocomplete="off">
+    </div>
+    <div class="sync-grid">
+      <div class="sync-card">
+        <h4>📡 This Device</h4>
+        <p>Create a sync session. A 6-digit code will appear — enter it on your other device.</p>
+        <button class="btn btn-primary" style="width:100%" id="syncHostBtn">Start Sync Session</button>
+        <div id="syncHostArea"></div>
+      </div>
+      <div class="sync-card">
+        <h4>🔗 Other Device</h4>
+        <p>Enter the 6-digit code shown on your other device to connect and sync instantly.</p>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <input type="text" class="sync-input" id="syncCode" placeholder="000 000" maxlength="7" style="text-align:center;font-size:1.2em;letter-spacing:4px;font-weight:700;margin-bottom:0;flex:1" inputmode="numeric">
+          <button class="btn btn-primary" id="syncJoinBtn" style="flex-shrink:0;height:44px">Join</button>
+        </div>
+        <div id="syncJoinArea"></div>
+      </div>
+    </div>
+    <details style="margin-top:24px">
+      <summary style="font-size:.78rem;color:var(--slate-400);cursor:pointer;text-align:center">Offline? Use file backup instead</summary>
+      <div class="sync-card" style="max-width:500px;margin:12px auto 0">
+        <h4>📁 Manual Backup</h4>
+        <p>Export or import an encrypted .thrift file for transfer via USB, email, or cloud drive.</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn" style="flex:1" id="syncFileExport">Export .thrift</button>
+          <label class="btn" style="flex:1;cursor:pointer;text-align:center">Import .thrift<input type="file" id="syncFileInput" accept=".thrift" style="display:none"></label>
+        </div>
+        <div class="sync-status" id="syncFileStatus"></div>
+      </div>
+    </details>
+    <div class="sync-info" style="justify-content:center;border:none;padding-top:16px">
+      🔒 AES-256-GCM encryption · Peer-to-peer · No servers see your data
+    </div>`;
+  initSyncHandlers();
+}
+
+function initSyncHandlers() {
+  const getPass = () => $('syncPass')?.value || '';
+
+  // HOST
+  $('syncHostBtn').addEventListener('click', async () => {
+    const pass = getPass();
+    if (!pass || pass.length < 4) { toast('Enter a passphrase (4+ chars)'); return; }
+    const area = $('syncHostArea');
+    area.innerHTML = '<div style="text-align:center;padding:16px;color:var(--slate-500);font-size:.82rem">Connecting...</div>';
+    try {
+      await loadPeerJS();
+      cleanupSync();
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      syncPeer = new Peer('thrift-' + code);
+      syncPeer.on('open', () => {
+        area.innerHTML = `
+          <div style="text-align:center;padding:20px 0 8px">
+            <div style="font-size:2.2em;font-weight:800;letter-spacing:8px;color:var(--green-dark);font-variant-numeric:tabular-nums">${code.slice(0,3)} ${code.slice(3)}</div>
+            <div style="font-size:.75rem;color:var(--slate-400);margin-top:6px">Enter this code on your other device</div>
+            <div style="font-size:.7rem;color:var(--slate-400);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px" id="syncHostWait">
+              <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite"></span>
+              Waiting for connection...
+            </div>
+          </div>`;
+      });
+      syncPeer.on('connection', conn => { handleSyncConn(conn, pass, 'syncHostArea'); });
+      syncPeer.on('error', e => { area.innerHTML = `<div class="sync-status show error" style="display:block;margin-top:12px">Connection error. Try again.</div>`; });
+    } catch (e) { area.innerHTML = `<div class="sync-status show error" style="display:block;margin-top:12px">${e.message}</div>`; }
+  });
+
+  // JOIN
+  $('syncJoinBtn').addEventListener('click', async () => {
+    const pass = getPass();
+    if (!pass || pass.length < 4) { toast('Enter the same passphrase as your other device'); return; }
+    const code = ($('syncCode').value || '').replace(/\s/g, '');
+    if (code.length !== 6 || !/^\d+$/.test(code)) { toast('Enter the 6-digit code'); return; }
+    const area = $('syncJoinArea');
+    area.innerHTML = '<div style="text-align:center;padding:12px;color:var(--slate-500);font-size:.82rem">Connecting...</div>';
+    try {
+      await loadPeerJS();
+      cleanupSync();
+      syncPeer = new Peer('thrift-join-' + Math.random().toString(36).slice(2,8));
+      syncPeer.on('open', () => {
+        syncConn = syncPeer.connect('thrift-' + code, { reliable:true });
+        handleSyncConn(syncConn, pass, 'syncJoinArea');
+      });
+      syncPeer.on('error', e => {
+        area.innerHTML = `<div class="sync-status show error" style="display:block;margin-top:12px">${e.type === 'peer-unavailable' ? 'No session found with that code. Check and try again.' : 'Connection failed. Check code and try again.'}</div>`;
+      });
+    } catch (e) { area.innerHTML = `<div class="sync-status show error" style="display:block;margin-top:12px">${e.message}</div>`; }
+  });
+
+  // FILE BACKUP
+  $('syncFileExport')?.addEventListener('click', async () => {
+    const pass = getPass();
+    if (!pass || pass.length < 4) { toast('Enter a passphrase first'); return; }
+    try {
+      const allTx = await dbGetAll('transactions');
+      const allGoals = await dbGetAll('goals').catch(() => []);
+      const allBudgets = await dbGetAll('budgets').catch(() => []);
+      const data = { transactions:allTx, goals:allGoals, budgets:allBudgets, app:'thrift', version:1, exportDate:new Date().toISOString() };
+      const enc = await encryptData(data, pass);
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(new Blob([enc]));
+      a.href = url;
+      a.download = `ledge-backup-${new Date().toISOString().slice(0,10)}.thrift`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      showSyncStatus('syncFileStatus', `Exported ${allTx.length} transactions + ${allGoals.length} goals + ${Object.keys(allBudgets).length || allBudgets.length || 0} budgets`, 'success');
+    } catch(e) { showSyncStatus('syncFileStatus', e.message, 'error'); }
+  });
+  $('syncFileInput')?.addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    const pass = getPass();
+    if (!pass) { toast('Enter a passphrase first'); return; }
+    try {
+      const imported = await decryptData(new Uint8Array(await file.arrayBuffer()), pass);
+      if (!imported.transactions) throw new Error('Invalid backup');
+      await applySyncMerge(imported);
+      showSyncStatus('syncFileStatus', 'Backup imported and merged!', 'success');
+    } catch(e) { showSyncStatus('syncFileStatus', e.message.includes('decrypt')?'Wrong passphrase':e.message, 'error'); }
+  });
+
+  // Auto-format code input
+  $('syncCode').addEventListener('input', e => {
+    let v = e.target.value.replace(/\D/g,'').slice(0,6);
+    if (v.length > 3) v = v.slice(0,3)+' '+v.slice(3);
+    e.target.value = v;
+  });
+}
+
+async function handleSyncConn(conn, pass, areaId) {
+  syncConn = conn;
+  conn.on('open', async () => {
+    $(areaId).innerHTML = '<div style="text-align:center;padding:12px;color:var(--green-dark);font-size:.82rem;font-weight:600">Connected! Syncing...</div>';
+    try {
+      const allTx = await dbGetAll('transactions');
+      const allGoals = await dbGetAll('goals').catch(() => []);
+      const myData = { transactions:allTx, goals:allGoals, app:'thrift', ts:Date.now() };
+      const encrypted = await encryptData(myData, pass);
+      conn.send({ type:'sync', payload:Array.from(encrypted) });
+    } catch(e) {
+      $(areaId).innerHTML = '<div class="sync-status show error" style="display:block;margin-top:12px">Failed to encrypt data</div>';
+    }
+  });
+  conn.on('data', async msg => {
+    if (msg.type === 'sync') {
+      try {
+        const imported = await decryptData(new Uint8Array(msg.payload), pass);
+        const result = await applySyncMerge(imported);
+        $(areaId).innerHTML = `
+          <div style="text-align:center;padding:16px">
+            <div style="font-size:1.8em;margin-bottom:4px">✅</div>
+            <div style="font-weight:700;color:var(--green-dark);margin-bottom:4px">Synced!</div>
+            <div style="font-size:.78rem;color:var(--slate-500)">${result.newTx} new transactions${result.newGoals?' + '+result.newGoals+' goals':''} merged</div>
+          </div>`;
+        setTimeout(cleanupSync, 5000);
+      } catch(e) {
+        $(areaId).innerHTML = `<div class="sync-status show error" style="display:block;margin-top:12px">${e.message.includes('decrypt')?'Passphrases don\'t match — both devices need the same one':'Sync failed: '+e.message}</div>`;
+        cleanupSync();
+      }
+    }
+  });
+  conn.on('error', () => { $(areaId).innerHTML = '<div class="sync-status show error" style="display:block;margin-top:12px">Connection lost</div>'; });
+}
+
+async function applySyncMerge(imported) {
+  const merged = mergeData({ transactions, goals:goals||[] }, imported);
+  const newTx = merged.transactions.length - transactions.length;
+  const newGoals = merged.goals.length - (goals||[]).length;
+  await dbClear('transactions');
+  if (merged.transactions.length) await dbAdd('transactions', merged.transactions);
+  await dbClear('goals');
+  if (merged.goals.length) await dbAdd('goals', merged.goals);
+  transactions = await dbGetAll('transactions');
+  try { goals = await dbGetAll('goals'); } catch(e) { goals = []; }
+  return { newTx, newGoals };
+}
+
+function showSyncStatus(id, msg, type) {
+  const el = $(id); if(!el) return;
+  el.textContent = msg;
+  el.className = 'sync-status show ' + type;
+}
+
+// ===== VIEW SWITCHING =====
+const VIEW_ORDER = ['dashboard','transactions','budgets','goals','sync'];
+const VIEW_TITLES = { dashboard:'Dashboard', transactions:'Transactions', budgets:'Budgets', goals:'Savings Goals', sync:'Device Sync' };
+
+function switchView(view) {
+  if (view === currentView) return;
+  const oldIdx = VIEW_ORDER.indexOf(currentView);
+  const newIdx = VIEW_ORDER.indexOf(view);
+  const dir = newIdx > oldIdx ? 'left' : 'right';
+  const c = $('content');
+
+  // Update state
+  currentView = view;
+  document.querySelectorAll('.nav-item,.bottom-nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll(`.nav-item[data-view="${view}"],.bottom-nav-item[data-view="${view}"]`).forEach(b => b.classList.add('active'));
+  $('viewTitle').textContent = VIEW_TITLES[view];
+  searchTerm = ''; filterCat = '';
+
+  // Render new content with a quick fade
+  c.style.transition = 'none';
+  c.style.opacity = '0';
+  render();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      c.style.transition = 'opacity .15s ease-out';
+      c.style.opacity = '1';
+      setTimeout(() => { c.style.transition = ''; }, 180);
+    });
+  });
+}
+
+// ===== BOTTOM NAV + MOBILE HANDLERS =====
+document.querySelectorAll('.bottom-nav-item[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+
+// Mobile buttons
+const btnMobile = $('btnImportMobile');
+if (btnMobile) btnMobile.addEventListener('click', () => { if (requirePro('CSV Import')) $('importModal').classList.add('open'); });
+const btnDemoMob = $('btnDemoMobile');
+if (btnDemoMob) btnDemoMob.addEventListener('click', () => loadDemo());
+const btnExportMob = $('btnExportMobile');
+if (btnExportMob) btnExportMob.addEventListener('click', () => $('navExport').click());
+const btnClearMob = $('btnClearMobile');
+if (btnClearMob) btnClearMob.addEventListener('click', () => clearAllData());
+
+// ===== OVERFLOW MENU (MOBILE) =====
+const overflowBtn = $('mobileOverflowBtn');
+const overflowMenu = $('mobileOverflowMenu');
+if (overflowBtn && overflowMenu) {
+  overflowBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    overflowMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!overflowMenu.contains(e.target) && e.target !== overflowBtn) {
+      overflowMenu.classList.remove('open');
+    }
+  });
+  overflowMenu.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => overflowMenu.classList.remove('open'));
+  });
+}
+
+// Redraw charts on resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => render(), 200);
+});
+
+// ===== INIT =====
+async function init() {
+  await openDB();
+  transactions = await dbGetAll('transactions');
+  try { goals = await dbGetAll('goals'); } catch(e) { goals = []; }
+  updateProUI();
+  render();
+}
+init();
+
+// ===== ADD/EDIT TRANSACTION MODAL =====
+let editingTxId = null;
+
+function openAddTxModal() {
+  editingTxId = null;
+  $('txModalTitle').textContent = 'Add Transaction';
+  $('txEditAmount').value = '';
+  $('txEditDesc').value = '';
+  $('txEditDate').value = new Date().toISOString().slice(0, 10);
+  $('txEditDelete').style.display = 'none';
+  $('txEditSave').textContent = 'Save';
+  // Receipt - show for Pro users
+  if (isPro) {
+    $('txReceiptRow').style.display = '';
+    $('txReceiptPreview').innerHTML = '';
+    $('txReceiptInput').value = '';
+  } else {
+    $('txReceiptRow').style.display = 'none';
+  }
+  $('txModal').classList.add('open');
+  setTimeout(() => $('txEditAmount').focus(), 100);
+}
+
+function openEditTxModal(txId) {
+  const tx = transactions.find(t => t.id === txId);
+  if (!tx) return;
+  editingTxId = txId;
+  $('txModalTitle').textContent = 'Edit Transaction';
+  $('txEditAmount').value = Math.abs(tx.amount).toFixed(2);
+  $('txEditDesc').value = tx.description;
+  $('txEditDate').value = tx.date;
+  $('txEditDelete').style.display = '';
+  $('txEditSave').textContent = 'Save Changes';
+  // Receipt
+  if (isPro) {
+    $('txReceiptRow').style.display = '';
+    $('txReceiptPreview').innerHTML = tx.receipt
+      ? `<img src="${tx.receipt}" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid var(--slate-200)"> <button class="btn" style="font-size:.75rem;padding:4px 10px;vertical-align:top" onclick="deleteReceiptFromModal(${txId})">Remove</button>`
+      : '';
+    $('txReceiptInput').value = '';
+  } else {
+    $('txReceiptRow').style.display = 'none';
+  }
+  $('txModal').classList.add('open');
+}
+
+async function deleteReceiptFromModal(txId) {
+  const tx = transactions.find(t => t.id === txId);
+  if (!tx) return;
+  tx.receipt = null;
+  await dbPut('transactions', tx);
+  $('txReceiptPreview').innerHTML = '';
+  toast('Receipt removed');
+}
+
+// FAB
+$('fabAdd').addEventListener('click', openAddTxModal);
+
+$('txEditCancel').addEventListener('click', () => {
+  $('txModal').classList.remove('open');
+  editingTxId = null;
+});
+$('txModal').addEventListener('click', e => {
+  if (e.target === $('txModal')) { $('txModal').classList.remove('open'); editingTxId = null; }
+});
+
+$('txEditDelete').addEventListener('click', async () => {
+  if (!editingTxId) return;
+  if (!confirm('Delete this transaction?')) return;
+  const txObj = db.transaction('transactions', 'readwrite');
+  txObj.objectStore('transactions').delete(editingTxId);
+  await new Promise(r => { txObj.oncomplete = r; });
+  transactions = transactions.filter(t => t.id !== editingTxId);
+  $('txModal').classList.remove('open');
+  editingTxId = null;
+  toast('Transaction deleted');
+  render();
+});
+
+$('txEditSave').addEventListener('click', async () => {
+  const amt = parseFloat($('txEditAmount').value);
+  if (!amt || amt <= 0) { toast('Enter a valid amount'); return; }
+  const desc = $('txEditDesc').value.trim();
+  if (!desc) { toast('Enter a description'); return; }
+  const date = $('txEditDate').value;
+  if (!date) { toast('Pick a date'); return; }
+
+  if (editingTxId !== null) {
+    // Edit existing
+    const tx = transactions.find(t => t.id === editingTxId);
+    if (!tx) return;
+    const wasNeg = tx.amount < 0;
+    tx.amount = wasNeg ? -Math.abs(amt) : Math.abs(amt);
+    tx.description = desc;
+    tx.date = date;
+    const receiptFile = $('txReceiptInput').files[0];
+    if (receiptFile) {
+      tx.receipt = await compressImage(receiptFile, 800, 0.7);
+    }
+    await dbPut('transactions', tx);
+    toast('Transaction updated');
+  } else {
+    // Add new — default to expense (negative)
+    const newTx = { date, description: desc, amount: -Math.abs(Math.round(amt * 100) / 100), category: categorize(desc) };
+    const receiptFile = $('txReceiptInput').files[0];
+    if (receiptFile) {
+      newTx.receipt = await compressImage(receiptFile, 800, 0.7);
+    }
+    await dbAdd('transactions', [newTx]);
+    transactions = await dbGetAll('transactions');
+    toast('Transaction added');
+  }
+
+  $('txModal').classList.remove('open');
+  editingTxId = null;
+  render();
+});
+
+// ===== RECEIPT PHOTOS =====
+function compressImage(file, maxDim, quality) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality || 0.7));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showReceiptLightbox(txId) {
+  const tx = transactions.find(t => t.id === txId);
+  if (!tx || !tx.receipt) return;
+  const lb = $('receiptLightbox');
+  lb.style.display = 'flex';
+  lb.className = 'receipt-lightbox';
+  lb.innerHTML = `
+    <button class="receipt-lightbox-close" onclick="closeReceiptLightbox()">&times;</button>
+    <img src="${tx.receipt}" alt="Receipt">
+    <div class="receipt-lightbox-actions">
+      <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border-color:rgba(255,255,255,0.3)" onclick="deleteReceipt(${txId})">Delete Receipt</button>
+    </div>`;
+  lb.addEventListener('click', e => { if (e.target === lb) closeReceiptLightbox(); });
+}
+
+function closeReceiptLightbox() {
+  const lb = $('receiptLightbox');
+  lb.style.display = 'none';
+  lb.innerHTML = '';
+}
+
+async function deleteReceipt(txId) {
+  const tx = transactions.find(t => t.id === txId);
+  if (!tx) return;
+  tx.receipt = null;
+  await dbPut('transactions', tx);
+  closeReceiptLightbox();
+  toast('Receipt removed');
+  render();
+}
+
+async function attachReceipt(txId, file) {
+  const dataUrl = await compressImage(file, 800, 0.7);
+  const tx = transactions.find(t => t.id === txId);
+  if (!tx) return;
+  tx.receipt = dataUrl;
+  await dbPut('transactions', tx);
+  toast('Receipt attached');
+  render();
+}
+
+// ===== DARK MODE =====
+function toggleDark() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('ledge_dark', isDark ? '1' : '0');
+  if (currentView === 'dashboard') render();
+}
+if (localStorage.getItem('ledge_dark') === '1') document.documentElement.classList.add('dark');
+else if (localStorage.getItem('ledge_dark') === null && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.documentElement.classList.add('dark');
+}
+const _darkBtn = $('btnDarkToggle');
+if (_darkBtn) _darkBtn.addEventListener('click', toggleDark);
+const _darkMob = $('btnDarkMob');
+if (_darkMob) _darkMob.addEventListener('click', toggleDark);
+
+// ===== ANDROID BACK BUTTON =====
+document.addEventListener('backbutton', function(e) {
+  e.preventDefault();
+  // 1. Close receipt lightbox
+  const lb = $('receiptLightbox');
+  if (lb && lb.style.display !== 'none' && lb.style.display !== '') { closeReceiptLightbox(); return; }
+  // 2. Close any open modal overlay
+  const modals = ['txModal','importModal','goalModal','upgradeModal'];
+  for (const id of modals) {
+    const m = $(id);
+    if (m && m.classList.contains('open')) { m.classList.remove('open'); return; }
+  }
+  // 3. Navigate back to dashboard
+  if (currentView !== 'dashboard') { switchView('dashboard'); return; }
+  // 4. Already on dashboard, nothing open — minimize app
+  if (navigator.app) navigator.app.exitApp();
+}, false);
+</script>
+
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
+</body>
+</html>
