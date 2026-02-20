@@ -252,7 +252,7 @@ tbody tr:last-child td{border-bottom:none}
 /* ===== TOAST ===== */
 .toast{
   position:fixed;bottom:20px;right:20px;
-  background:var(--slate);color:white;
+  background:#1E293B;color:white;
   padding:10px 20px;border-radius:10px;font-size:.82rem;
   transform:translateY(60px);opacity:0;transition:all .3s;z-index:100;pointer-events:none;
 }
@@ -521,6 +521,9 @@ html.dark .price-note{color:#8FA88F !important}
 html.dark .empty-state p{color:#8FA88F}
 html.dark details details>summary{filter:brightness(1.8) saturate(0.7)}
 html.dark .budget-item-edit:hover{color:#6EE7B7}
+html.dark .tip-card{border-color:#5A5A2A}
+html.dark .tip-text{color:#FDE68A}
+html.dark .tip-text strong{color:#FBBF24}
 html.dark .receipt-btn{border-color:#3A4A3A;color:#8FA88F}
 html.dark .receipt-btn:hover{border-color:#6EE7B7;color:#6EE7B7}
 html.dark .receipt-thumb{border-color:#3A4A3A}
@@ -667,6 +670,8 @@ html.desktop .sidebar *{-webkit-app-region:no-drag}
       <div class="overflow-dropdown" id="mobileOverflowMenu">
         <button id="btnDemoMobile">&#9654; Load Demo Data</button>
         <button id="btnExportMobile">&#128229; Export Data</button>
+        <div class="overflow-divider"></div>
+        <button id="btnHelpMobile">&#10067; How to Use</button>
         <div class="overflow-divider"></div>
         <button id="btnClearMobile" class="danger-item">&#128465; Clear All Data</button>
       </div>
@@ -1019,6 +1024,10 @@ html.desktop .sidebar *{-webkit-app-region:no-drag}
       <label style="display:block;font-size:.82rem;font-weight:600;color:var(--slate-500);margin-bottom:4px">Date</label>
       <input type="date" id="txEditDate" style="width:100%;padding:10px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:1rem;font-family:inherit">
     </div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:.82rem;font-weight:600;color:var(--slate-500);margin-bottom:4px">Category</label>
+      <select id="txEditCategory" style="width:100%;padding:10px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:1rem;font-family:inherit"></select>
+    </div>
     <div id="txReceiptRow" style="margin-bottom:12px">
       <label style="display:block;font-size:.82rem;font-weight:600;color:var(--slate-500);margin-bottom:4px">Receipt Photo</label>
       <label class="receipt-btn" style="display:inline-flex;padding:8px 14px;font-size:.85rem;gap:6px">
@@ -1039,6 +1048,42 @@ html.desktop .sidebar *{-webkit-app-region:no-drag}
 <button class="fab" id="fabAdd" title="Add Transaction" aria-label="Add Transaction">+</button>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- WELCOME / INSTRUCTIONS MODAL -->
+<div class="modal-overlay" id="welcomeModal" role="dialog" aria-label="Welcome instructions">
+  <div class="modal" style="max-width:460px">
+    <h3 style="text-align:center;margin-bottom:4px">Welcome to Ledge</h3>
+    <p style="text-align:center;font-size:.78rem;color:var(--slate-500);margin-bottom:16px">Your everyday budget buddy — 100% private, 100% local.</p>
+    <div style="font-size:.84rem;line-height:1.7;color:var(--slate-700)">
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px">
+        <span style="font-size:1.2em;flex-shrink:0">1.</span>
+        <div><strong>Set your balance</strong> — Tap the Balance card on the dashboard to enter your current account balance. This keeps everything accurate.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px">
+        <span style="font-size:1.2em;flex-shrink:0">2.</span>
+        <div><strong>Import your bank CSV</strong> — Download a CSV from your bank's website, then import it here. We auto-detect Chase, US Bank, Wells Fargo, Capital One, Citi, Discover, and Bank of America.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px">
+        <span style="font-size:1.2em;flex-shrink:0">3.</span>
+        <div><strong>Add transactions manually</strong> — Tap the <strong>+</strong> button to log purchases as you go. Category is auto-suggested from the description.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px">
+        <span style="font-size:1.2em;flex-shrink:0">4.</span>
+        <div><strong>Edit anything</strong> — Tap any transaction to change the amount, description, date, or category.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:14px">
+        <span style="font-size:1.2em;flex-shrink:0">5.</span>
+        <div><strong>Stay private</strong> — All data is stored on this device only. Nothing is uploaded, no account needed.</div>
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--slate-500);margin-bottom:14px;cursor:pointer">
+      <input type="checkbox" id="welcomeDismiss"> Don't show this again
+    </label>
+    <div style="text-align:center">
+      <button class="btn btn-primary" id="welcomeClose" style="min-width:140px">Get Started</button>
+    </div>
+  </div>
+</div>
 
 <!-- RECEIPT LIGHTBOX -->
 <div id="receiptLightbox" style="display:none"></div>
@@ -1064,9 +1109,14 @@ function validateKey(key) {
   return check === String.fromCharCode(65 + (h % 26)) + String.fromCharCode(65 + ((h >> 5) % 26));
 }
 
-function activatePro() {
+function activatePro(licenseKey) {
   isPro = true;
   localStorage.setItem('thrift_pro', '1');
+  dbPut('settings', { key: 'pro', value: '1' });
+  if (licenseKey) {
+    localStorage.setItem('thrift_pro_key', licenseKey);
+    dbPut('settings', { key: 'pro_key', value: licenseKey });
+  }
   document.getElementById('upgradeModal').classList.remove('open');
   updateProUI();
   toast('Pro activated! All your data is right where you left it.');
@@ -1152,7 +1202,7 @@ document.getElementById('upgradeActivate').addEventListener('click', () => {
     status.className = 'key-status success';
     setTimeout(() => {
       document.getElementById('upgradeModal').classList.remove('open');
-      activatePro();
+      activatePro(key);
     }, 600);
   } else {
     input.classList.add('error');
@@ -1213,7 +1263,7 @@ function categorize(desc) {
 // ===== DATABASE =====
 let db = null;
 const DB_NAME = 'thrift_db';
-const DB_VER = 2;
+const DB_VER = 3;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -1230,6 +1280,9 @@ function openDB() {
       }
       if (!d.objectStoreNames.contains('goals')) {
         d.createObjectStore('goals', { keyPath: 'id', autoIncrement: true });
+      }
+      if (!d.objectStoreNames.contains('settings')) {
+        d.createObjectStore('settings', { keyPath: 'key' });
       }
     };
     req.onsuccess = e => { db = e.target.result; resolve(db); };
@@ -1277,6 +1330,7 @@ function dbPut(store, item) {
 let transactions = [];
 let budgets = {};
 let goals = [];
+let startingBalance = 0;
 let currentView = 'dashboard';
 let searchTerm = '';
 let filterCat = '';
@@ -1360,13 +1414,14 @@ function parseDate(str) {
 
 // ===== SMART BANK DETECTION =====
 const BANK_SIGNATURES = {
+  // Ordered by specificity — most specific patterns first to avoid false matches
+  discover:   { name:'Discover', color:'#FF6600', headers:[/trans\. date/i, /post date/i, /description/i, /amount/i, /category/i], combo:/trans.*date.*post date.*description.*amount.*category/i },
+  citi:       { name:'Citi', color:'#003B70', headers:[/status/i, /date/i, /description/i, /debit/i, /credit/i], combo:/status.*date.*description.*debit.*credit/i },
+  usbank:     { name:'US Bank', color:'#D8273F', headers:[/date/i, /transaction/i, /name/i, /memo/i, /amount/i], combo:/date.*transaction.*name.*memo.*amount/i },
+  capitalone: { name:'Capital One', color:'#004977', headers:[/transaction date/i, /posted date/i, /card no/i], combo:/transaction date.*posted date.*card no/i },
   chase:      { name:'Chase', color:'#117ACA', headers:[/transaction date/i, /post date/i, /description/i], combo:/transaction date.*post date.*description/i },
   bofa:       { name:'Bank of America', color:'#012169', headers:[/date/i, /description/i, /amount/i], combo:/date.*description.*amount/i, hint:/posted date|reference number/i },
   wellsfargo: { name:'Wells Fargo', color:'#C41230', headers:[/date/i, /amount/i], combo:/date.*amount/i, hint:/^\d{1,2}\/\d{1,2}\/\d{4},".*?"/ },
-  capitalone: { name:'Capital One', color:'#004977', headers:[/transaction date/i, /posted date/i, /card no/i], combo:/transaction date.*posted date.*card no/i },
-  citi:       { name:'Citi', color:'#003B70', headers:[/status/i, /date/i, /description/i, /debit/i, /credit/i], combo:/status.*date.*description.*debit.*credit/i },
-  discover:   { name:'Discover', color:'#FF6600', headers:[/trans\. date/i, /post date/i, /description/i, /amount/i, /category/i], combo:/trans.*date.*post date.*description.*amount.*category/i },
-  usbank:     { name:'US Bank', color:'#D8273F', headers:[/date/i, /transaction/i, /name/i, /memo/i, /amount/i], combo:/date.*transaction.*name.*memo.*amount/i },
 };
 
 function detectBank(headerLine, firstFewLines) {
@@ -1456,7 +1511,7 @@ function renderDashboard(el) {
   const income = thisMonthTx.filter(t => t.amount > 0).reduce((s,t) => s+t.amount, 0);
   const spending = Math.abs(thisMonthTx.filter(t => t.amount < 0).reduce((s,t) => s+t.amount, 0));
   const lastSpending = Math.abs(lastMonthTx.filter(t => t.amount < 0).reduce((s,t) => s+t.amount, 0));
-  const balance = transactions.reduce((s,t) => s+t.amount, 0);
+  const balance = startingBalance + transactions.reduce((s,t) => s+t.amount, 0);
   const savingsRate = income > 0 ? Math.round(((income - spending) / income) * 100) : 0;
 
   const spendChange = lastSpending > 0 ? Math.round(((spending - lastSpending) / lastSpending) * 100) : 0;
@@ -1526,8 +1581,8 @@ function renderDashboard(el) {
       <div class="tip-text">${tipMessages[0]}</div>
     </div>
     <div class="metrics">
-      <div class="metric-card">
-        <div class="metric-label">💰 Net Balance</div>
+      <div class="metric-card" onclick="editBalance()" style="cursor:pointer">
+        <div class="metric-label">💰 Balance${startingBalance === 0 ? ' <span style="font-size:.65rem;color:var(--amber);font-weight:400">(tap to set)</span>' : ''}</div>
         <div class="metric-value" style="color:${balance>=0?'var(--green-dark)':'var(--red)'}">${fmt(balance)}</div>
       </div>
       <div class="metric-card">
@@ -1951,7 +2006,10 @@ async function clearAllData() {
   await dbClear('transactions');
   await dbClear('goals');
   transactions = [];
+  startingBalance = 0;
   localStorage.removeItem('thrift_pro');
+  dbPut('settings', { key: 'pro', value: '0' }).catch(() => {});
+  dbPut('settings', { key: 'startingBalance', value: '0' }).catch(() => {});
   isPro = false;
   updateProUI();
   toast('All data cleared');
@@ -1971,6 +2029,21 @@ $('navExport').addEventListener('click', async () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 3000);
   toast('Data exported as CSV');
 });
+
+// ===== BALANCE EDITOR =====
+function editBalance() {
+  const txTotal = transactions.reduce((s,t) => s+t.amount, 0);
+  const current = startingBalance + txTotal;
+  const input = prompt('Enter your current account balance:', current.toFixed(2));
+  if (input === null) return;
+  const val = parseFloat(input.replace(/[^-\d.]/g, ''));
+  if (isNaN(val)) { toast('Invalid amount'); return; }
+  // Work backwards: startingBalance = desired balance - transaction total
+  startingBalance = Math.round((val - txTotal) * 100) / 100;
+  dbPut('settings', { key: 'startingBalance', value: String(startingBalance) }).catch(() => {});
+  toast('Balance updated');
+  render();
+}
 
 // Toast
 let toastT = null;
@@ -2341,6 +2414,8 @@ const btnExportMob = $('btnExportMobile');
 if (btnExportMob) btnExportMob.addEventListener('click', () => $('navExport').click());
 const btnClearMob = $('btnClearMobile');
 if (btnClearMob) btnClearMob.addEventListener('click', () => clearAllData());
+const btnHelpMob = $('btnHelpMobile');
+if (btnHelpMob) btnHelpMob.addEventListener('click', () => showWelcome());
 
 // ===== OVERFLOW MENU (MOBILE) =====
 const overflowBtn = $('mobileOverflowBtn');
@@ -2370,15 +2445,86 @@ window.addEventListener('resize', () => {
 // ===== INIT =====
 async function init() {
   await openDB();
+  // Restore settings from IndexedDB (more reliable than localStorage on Android)
+  try {
+    const settings = await dbGetAll('settings');
+    const proSetting = settings.find(s => s.key === 'pro');
+    const proKey = settings.find(s => s.key === 'pro_key');
+    // Re-validate the stored key to restore pro status
+    if (proKey && proKey.value && validateKey(proKey.value)) {
+      isPro = true;
+      localStorage.setItem('thrift_pro', '1');
+      localStorage.setItem('thrift_pro_key', proKey.value);
+    } else if (proSetting && proSetting.value === '1') {
+      isPro = true;
+      localStorage.setItem('thrift_pro', '1');
+    } else {
+      // Check localStorage key as last resort
+      const lsKey = localStorage.getItem('thrift_pro_key');
+      if (lsKey && validateKey(lsKey)) {
+        isPro = true;
+        localStorage.setItem('thrift_pro', '1');
+        dbPut('settings', { key: 'pro', value: '1' });
+        dbPut('settings', { key: 'pro_key', value: lsKey });
+      }
+    }
+    const balSetting = settings.find(s => s.key === 'startingBalance');
+    if (balSetting) startingBalance = parseFloat(balSetting.value) || 0;
+  } catch(e) {}
   transactions = await dbGetAll('transactions');
   try { goals = await dbGetAll('goals'); } catch(e) { goals = []; }
+  // Request persistent storage so browser/WebView won't evict data
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist();
+  }
   updateProUI();
   render();
+  // Show welcome on startup unless dismissed (check both localStorage and IndexedDB)
+  if (localStorage.getItem('ledge_welcomed') !== '1') {
+    try {
+      const settings = await dbGetAll('settings');
+      const welcomed = settings.find(s => s.key === 'welcomeDismissed');
+      if (welcomed && welcomed.value === '1') {
+        localStorage.setItem('ledge_welcomed', '1');
+      } else {
+        showWelcome();
+      }
+    } catch(e) { showWelcome(); }
+  }
 }
 init();
 
+// ===== WELCOME / INSTRUCTIONS =====
+function showWelcome() {
+  $('welcomeDismiss').checked = false;
+  $('welcomeModal').classList.add('open');
+}
+$('welcomeClose').addEventListener('click', () => {
+  $('welcomeModal').classList.remove('open');
+  if ($('welcomeDismiss').checked) {
+    localStorage.setItem('ledge_welcomed', '1');
+    dbPut('settings', { key: 'welcomeDismissed', value: '1' }).catch(() => {});
+  }
+});
+$('welcomeModal').addEventListener('click', e => {
+  if (e.target.id === 'welcomeModal') {
+    $('welcomeModal').classList.remove('open');
+    if ($('welcomeDismiss').checked) {
+      localStorage.setItem('ledge_welcomed', '1');
+      dbPut('settings', { key: 'welcomeDismissed', value: '1' }).catch(() => {});
+    }
+  }
+});
+
 // ===== ADD/EDIT TRANSACTION MODAL =====
 let editingTxId = null;
+
+function populateCategorySelect(selected) {
+  const sel = $('txEditCategory');
+  sel.innerHTML = Object.entries(CATEGORIES).map(([k, v]) =>
+    `<option value="${k}"${k === selected ? ' selected' : ''}>${v.name}</option>`
+  ).join('');
+}
 
 function openAddTxModal() {
   editingTxId = null;
@@ -2386,6 +2532,7 @@ function openAddTxModal() {
   $('txEditAmount').value = '';
   $('txEditDesc').value = '';
   $('txEditDate').value = new Date().toISOString().slice(0, 10);
+  populateCategorySelect('other');
   $('txEditDelete').style.display = 'none';
   $('txEditSave').textContent = 'Save';
   // Receipt - show for Pro users
@@ -2408,6 +2555,7 @@ function openEditTxModal(txId) {
   $('txEditAmount').value = Math.abs(tx.amount).toFixed(2);
   $('txEditDesc').value = tx.description;
   $('txEditDate').value = tx.date;
+  populateCategorySelect(tx.category || 'other');
   $('txEditDelete').style.display = '';
   $('txEditSave').textContent = 'Save Changes';
   // Receipt
@@ -2431,6 +2579,12 @@ async function deleteReceiptFromModal(txId) {
   $('txReceiptPreview').innerHTML = '';
   toast('Receipt removed');
 }
+
+// Auto-suggest category when typing description in add mode
+$('txEditDesc').addEventListener('input', function() {
+  if (editingTxId !== null) return;
+  $('txEditCategory').value = categorize(this.value);
+});
 
 // FAB
 $('fabAdd').addEventListener('click', openAddTxModal);
@@ -2472,6 +2626,7 @@ $('txEditSave').addEventListener('click', async () => {
     tx.amount = wasNeg ? -Math.abs(amt) : Math.abs(amt);
     tx.description = desc;
     tx.date = date;
+    tx.category = $('txEditCategory').value;
     const receiptFile = $('txReceiptInput').files[0];
     if (receiptFile) {
       tx.receipt = await compressImage(receiptFile, 800, 0.7);
@@ -2480,7 +2635,7 @@ $('txEditSave').addEventListener('click', async () => {
     toast('Transaction updated');
   } else {
     // Add new — default to expense (negative)
-    const newTx = { date, description: desc, amount: -Math.abs(Math.round(amt * 100) / 100), category: categorize(desc) };
+    const newTx = { date, description: desc, amount: -Math.abs(Math.round(amt * 100) / 100), category: $('txEditCategory').value };
     const receiptFile = $('txReceiptInput').files[0];
     if (receiptFile) {
       newTx.receipt = await compressImage(receiptFile, 800, 0.7);
